@@ -14,23 +14,42 @@
 
 // Auto-detect Laravel base path
 // Try multiple possible locations for flexibility
-$possiblePaths = [
-    __DIR__ . '/../laravel/',            // cPanel: public_html -> laravel (PRIMARY)
-    __DIR__ . '/../',                    // Standard Laravel structure
-    __DIR__ . '/../../laravel/',         // Alternative cPanel structure
-    dirname(dirname(__DIR__)) . '/laravel/', // Fallback with laravel folder
-];
+/*
+|--------------------------------------------------------------------------
+| Auto-detect Laravel base path for both deployment patterns:
+| 1. Standard: Laravel core outside web root (public_html -> ../laravel)
+| 2. Simple: Everything in public_html (Laravel root = parent of public)
+|--------------------------------------------------------------------------
+*/
 
 $laravelBasePath = null;
-foreach ($possiblePaths as $path) {
-    if (file_exists($path . 'bootstrap/app.php')) {
-        $laravelBasePath = realpath($path);
-        break;
+
+// Try standard structure first (parent directory)
+$standardPath = realpath(__DIR__ . '/..');
+if ($standardPath && file_exists($standardPath . '/vendor/autoload.php') && file_exists($standardPath . '/bootstrap/app.php')) {
+    $laravelBasePath = $standardPath;
+}
+
+// If not found, try cPanel pattern (laravel folder)
+if (!$laravelBasePath) {
+    $cpanelPaths = [
+        __DIR__ . '/../laravel/',
+        __DIR__ . '/../../laravel/',
+        dirname(dirname(__DIR__)) . '/laravel/',
+    ];
+    
+    foreach ($cpanelPaths as $path) {
+        $realPath = realpath($path);
+        if ($realPath && file_exists($realPath . '/vendor/autoload.php') && file_exists($realPath . '/bootstrap/app.php')) {
+            $laravelBasePath = $realPath;
+            break;
+        }
     }
 }
 
+// Final fallback: use parent directory (simple deployment)
 if (!$laravelBasePath) {
-    die('Laravel application not found. Please check your deployment structure.');
+    $laravelBasePath = dirname(__DIR__);
 }
 
 // Define Laravel base path

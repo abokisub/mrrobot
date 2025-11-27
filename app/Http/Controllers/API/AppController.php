@@ -17,23 +17,34 @@ class AppController extends Controller
         $adexAppKey = env('ADEX_APP_KEY', '');
         $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
         
+        // Normalize origins (remove trailing slashes and convert to lowercase for comparison)
+        $normalizedAllowedOrigins = array_map(function($url) {
+            return strtolower(rtrim($url, '/'));
+        }, $allowedOrigins);
+        
         if (env('APP_ENV') === 'local') {
-            $allowedOrigins = array_merge($allowedOrigins, [
+            $localhostOrigins = [
                 'http://localhost:3000',
                 'http://127.0.0.1:3000',
                 'http://localhost:8080',
                 'http://127.0.0.1:8080',
                 'http://localhost:8000',
                 'http://127.0.0.1:8000'
-            ]);
+            ];
+            $normalizedAllowedOrigins = array_merge($normalizedAllowedOrigins, array_map(function($url) {
+                return strtolower(rtrim($url, '/'));
+            }, $localhostOrigins));
         }
         
         // Check if origin is allowed
         $originAllowed = false;
         if (empty($origin) && env('APP_ENV') === 'local') {
             $originAllowed = true; // Allow in local environment
-        } elseif (in_array(rtrim($origin, '/'), $allowedOrigins)) {
-            $originAllowed = true;
+        } elseif ($origin) {
+            $normalizedOrigin = strtolower(rtrim($origin, '/'));
+            if (in_array($normalizedOrigin, $normalizedAllowedOrigins)) {
+                $originAllowed = true;
+            }
         }
         
         if ($originAllowed) {

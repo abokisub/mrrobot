@@ -14,10 +14,16 @@ class  Banks extends Controller
 {
  public function GetBanksArray(Request $request)
 {
-       $allowedOrigins = explode(',', env('ADEX_APP_KEY'));
-$origin = $request->header('Origin');
-$authorization = $request->header('Authorization');
-if (in_array($origin, $allowedOrigins) || env('ADEX_DEVICE_KEY') === $authorization) {
+       $allowedOrigins = array_filter(array_map('trim', explode(',', env('ADEX_APP_KEY', ''))));
+       $origin = rtrim($request->header('Origin', ''), '/');
+       $authorization = $request->header('Authorization');
+       
+       // Normalize origins for comparison (remove trailing slashes)
+       $normalizedOrigins = array_map(function($url) {
+           return rtrim($url, '/');
+       }, $allowedOrigins);
+       
+       if (in_array($origin, $normalizedOrigins) || env('ADEX_DEVICE_KEY') === $authorization) {
         if (!empty($request->id)) {
            $auth_user = DB::table('user')->where('status', 1)->where(function($query) use ($request) {
            $query->orWhere('id', $this->verifytoken($request->id))

@@ -24,7 +24,7 @@
                     <tr>
                         <td style="text-align:center;">
                           <a href="{{ env('APP_URL') }}" title="logo" target="_blank">
-                            <img width="200" src={{ asset('storage/welcome.png') }} title="logo" alt="logo">
+                            <img width="200" src={{ env('APP_URL').'/upload/welcome.png' }} title="logo" alt="logo">
                           </a>
                         </td>
                     </tr>

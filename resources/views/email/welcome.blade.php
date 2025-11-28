@@ -119,7 +119,7 @@
                                                 <tr class="">
                                                     <td class="">
                                                         <img alt="web image" class="" height="155"
-                                                            src={{ asset('storage/welcome.png') }}
+                                                            src={{ env('APP_URL') . '/upload/welcome.png' }}
                                                             width="155">
                                                     </td>
                                                 </tr>

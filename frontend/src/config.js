@@ -61,7 +61,7 @@ export const PATH_AFTER_DOCS = DOCS.root
 
 // LAYOUT
 // ----------------------------------------------------------------------
-export const APP_NAME = "Abokisub";
+export const APP_NAME = "KoboPoint";
 
 export const HEADER = {
   MOBILE_HEIGHT: 64,

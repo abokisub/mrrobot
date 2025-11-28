@@ -36,6 +36,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('verify/user/accounct', [AuthController::class, 'verify']);
 Route::get('website/app/setting', [AppController::class, 'system']);
 Route::post('login/verify/user', [AuthController::class, 'login']);
+Route::post('logout/user', [AuthController::class, 'logout']);
 Route::post('upgrade/api/user', [AppController::class, 'apiUpgrade']);
 Route::get('/user/resend/{id}/otp', [AuthController::class, 'resendOtp']);
 Route::post('/website/affliate/user', [AppController::class, 'buildWebsite']);
@@ -318,3 +319,15 @@ Route::get('/test', function () {
 
 Route::post('xixapay/webhook', [\App\Http\Controllers\API\PaymentController::class, 'Xixapay']);
 Route::post('monnify/webhook', [\App\Http\Controllers\API\PaymentController::class, 'MonnifyWebhook']);
+
+// BellBank API Routes (protected - requires authentication)
+Route::prefix('bellbank')->middleware('auth:sanctum')->group(function () {
+    Route::get('banks', [\App\Http\Controllers\API\BellBankController::class, 'getBanks']);
+    Route::post('name-enquiry', [\App\Http\Controllers\API\BellBankController::class, 'nameEnquiry']);
+    Route::post('virtual-account', [\App\Http\Controllers\API\BellBankController::class, 'createVirtualAccount']);
+    Route::post('transfer', [\App\Http\Controllers\API\BellBankController::class, 'initiateTransfer']);
+    Route::get('transaction/{reference}', [\App\Http\Controllers\API\BellBankController::class, 'getTransactionStatus']);
+});
+
+// BellBank Webhook (no auth required, signature verified)
+Route::post('webhook/bellbank', [\App\Http\Controllers\API\BellBankWebhookController::class, 'handle']);

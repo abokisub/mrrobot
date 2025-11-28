@@ -165,8 +165,10 @@ export default function RegisterForm() {
     watch,
     trigger,
     setError,
+    clearErrors,
     handleSubmit,
     formState: { errors, isSubmitting },
+    getValues,
   } = methods;
 
   const password = watch('password');
@@ -190,6 +192,9 @@ export default function RegisterForm() {
   const passwordValue = watch('password');
   const confirmPasswordValue = watch('confirmPassword');
 
+  // Watch all form fields to clear errors when user fills them
+  const watchedFields = watch();
+
   // Update password strength when password changes
   useEffect(() => {
     if (passwordValue) {
@@ -201,6 +206,41 @@ export default function RegisterForm() {
       setPasswordsMatch(false);
     }
   }, [passwordValue, confirmPasswordValue]);
+
+  // Clear step validation error when user starts filling fields
+  useEffect(() => {
+    if (errors.stepValidation) {
+      const values = getValues();
+      let allFieldsFilled = false;
+      
+      if (activeStep === 0) {
+        allFieldsFilled = 
+          values.firstName?.trim() !== '' &&
+          values.lastName?.trim() !== '' &&
+          values.username?.trim() !== '' &&
+          values.gender !== '';
+      } else if (activeStep === 1) {
+        allFieldsFilled = 
+          values.state?.trim() !== '' &&
+          values.city?.trim() !== '' &&
+          values.streetAddress?.trim() !== '';
+      } else if (activeStep === 2) {
+        allFieldsFilled = 
+          values.phone?.trim() !== '' &&
+          values.password?.trim() !== '' &&
+          values.confirmPassword?.trim() !== '' &&
+          values.email?.trim() !== '' &&
+          values.pin?.trim() !== '' &&
+          values.password === values.confirmPassword;
+      }
+      
+      // If all fields are now filled, clear the error
+      if (allFieldsFilled) {
+        clearErrors('stepValidation');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedFields, activeStep, errors.stepValidation]);
 
   const handleNext = async () => {
     let fieldsToValidate = [];
@@ -281,17 +321,19 @@ export default function RegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      // Combine first and last name
-      const fullName = `${data.firstName} ${data.lastName}`;
-      
       await register(
         data.email,
         data.password,
-        fullName,
+        data.firstName,
+        data.lastName,
         data.username,
         data.phone,
         data.ref || '',
-        data.pin
+        data.pin,
+        data.gender,
+        data.state,
+        data.city,
+        data.streetAddress
       );
     } catch (error) {
       if (isMountedRef.current) {

@@ -44,8 +44,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -407,8 +407,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -555,8 +555,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -660,8 +660,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -1859,8 +1859,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -2014,8 +2014,8 @@ class Auth extends Controller
                         'name'  => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => number_format($user->bal, 2),
+                        'refbal' => number_format($user->refbal, 2),
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,

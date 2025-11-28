@@ -21,31 +21,40 @@ class AuthController extends Controller
         
         if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             $validator = validator::make($request->all(), [
-                'name' => 'required|max:199|min:8',
-                'email' => 'required|unique:user,email|max:255|email',
-                'phone' => 'required|numeric|unique:user,phone|digits:11',
-                'password' => 'required|min:8',
+                'firstName' => 'required|string|max:100',
+                'lastName' => 'required|string|max:100',
                 'username' => 'required|unique:user,username|max:12|string|alpha_num',
+                'gender' => 'required|in:male,female,other',
+                'state' => 'required|string|max:100',
+                'city' => 'required|string|max:100',
+                'streetAddress' => 'required|string|max:255',
+                'phone' => 'required|numeric|unique:user,phone|digits:11',
+                'email' => 'required|unique:user,email|max:255|email',
+                'password' => 'required|min:8',
                 'pin' => 'required|numeric|digits:4'
             ], [
-                'name.required' => 'Full Name is Required',
-                'email.required' => 'E-mail is Required',
-                'phone.required' => 'Phone Number Required',
-                'password.required' => 'Password Required',
-                'username.required' => 'Username Required',
+                'firstName.required' => 'First Name is Required',
+                'lastName.required' => 'Last Name is Required',
+                'username.required' => 'Username is Required',
                 'username.unique' => 'Username already Taken',
+                'username.max' => 'Username Maximum Length is 12',
+                'gender.required' => 'Gender is Required',
+                'gender.in' => 'Gender must be male, female, or other',
+                'state.required' => 'State is Required',
+                'city.required' => 'City is Required',
+                'streetAddress.required' => 'Street Address is Required',
+                'phone.required' => 'Phone Number is Required',
                 'phone.unique' => 'Phone Number already Taken',
-                'username.max' => 'Username Maximum Length is 12 ' . $request->username,
-
-                'email.unique' => 'Email Alreay Taken',
-                'password.min' => 'Password Not Strong Enough',
-                'name.min' => 'Invalid Full Name',
-                'name.max' => 'Invalid Full Name',
-                'phone.numeric' => 'Phone Number Must be Numeric ' . $request->phone,
-
-                'pin.required' => 'Transaction Pin Required',
-                'pin.numeric' => 'Transaction Pin Numeric',
-                'pin.digits' => 'Transaction Pin Digits Must Be 4'
+                'phone.numeric' => 'Phone Number Must be Numeric',
+                'phone.digits' => 'Phone Number Must be 11 Digits',
+                'email.required' => 'E-mail is Required',
+                'email.unique' => 'Email Already Taken',
+                'email.email' => 'Invalid Email Format',
+                'password.required' => 'Password is Required',
+                'password.min' => 'Password Must be at Least 8 Characters',
+                'pin.required' => 'Transaction PIN is Required',
+                'pin.numeric' => 'Transaction PIN Must be Numeric',
+                'pin.digits' => 'Transaction PIN Must be 4 Digits'
             ]);
             // checking referal user details
             if ($request->ref != null) {
@@ -72,7 +81,8 @@ class AuthController extends Controller
                     ])->setStatusCode(403);
                 } else {
                     $user = new User();
-                    $user->name = $request->name;
+                    // Combine first name and last name for name field
+                    $user->name = trim($request->firstName . ' ' . $request->lastName);
                     $user->username = $request->username;
                     $user->email = $request->email;
                     $user->phone = $request->phone;
@@ -82,13 +92,19 @@ class AuthController extends Controller
                     $user->app_key = $user->apikey;
                     $user->bal = '0.00';
                     $user->refbal = '0.00';
-                    $user->ref = $request->ref;
+                    $user->ref = $request->ref ?? null;
                     $user->type = 'SMART';
                     $user->date = Carbon::now("Africa/Lagos")->toDateTimeString();
                     $user->kyc = '0';
                     $user->status = '0';
                     $user->user_limit = $this->adex_key()->default_limit;
                     $user->pin = $request->pin;
+                    // Save new address fields
+                    $user->address = trim($request->streetAddress . ', ' . $request->city . ', ' . $request->state);
+                    // Save gender (will be added via migration)
+                    if (isset($request->gender)) {
+                        $user->gender = $request->gender;
+                    }
                     $user->save();
                     if ($user != null) {
                         $this->monnify_account($user->username);
@@ -262,29 +278,26 @@ class AuthController extends Controller
                             // Log but don't fail if insert_stock fails
                             \Log::warning('insert_stock failed: ' . $e->getMessage());
                         }
+                        
+                        // Check and create BellBank virtual account if missing
+                        try {
+                            $bellAccount = \App\Models\BellAccount::where('user_id', $user->id)->first();
+                            if (!$bellAccount) {
+                                $userModel = \App\Models\User::find($user->id);
+                                if ($userModel) {
+                                    \App\Jobs\CreateBellBankVirtualAccount::dispatch($userModel);
+                                    \Log::info('BellBank virtual account creation job dispatched for existing user', [
+                                        'user_id' => $user->id,
+                                        'username' => $user->username,
+                                    ]);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to check/create BellBank virtual account: ' . $e->getMessage());
+                        }
+                        
                         $user = DB::table('user')->where(['id' => $user->id])->first();
-                        $user_details = [
-                            'username' => $user->username,
-                            'name' => $user->name,
-                            'phone' => $user->phone,
-                            'email' => $user->email,
-                            'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                            'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
-                            'kyc' => $user->kyc,
-                            'type' => $user->type,
-                            'pin' => $user->pin,
-                            'profile_image' => $user->profile_image,
-                            'sterlen' => $user->sterlen,
-                            'fed' => $user->fed,
-                            'wema' => $user->wema,
-                            'rolex' => $user->rolex,
-                            'vdf' => $user->vdf,
-                            'address' => $user->address,
-                            'webhook' => $user->webhook,
-                            'about' => $user->about,
-                            'apikey' => $user->apikey,
-                            'is_bvn' => $user->bvn == null ? false : true
-                        ];
+                        $user_details = $this->getUserDetailsWithBellBank($user);
 
                         if ($user->status == 0) {
                             return response()->json([
@@ -293,9 +306,36 @@ class AuthController extends Controller
                                 'user' => $user_details
                             ]);
                         } else if ($user->status == 1) {
-                            //set up the user over here
-
-
+                            // Check if user has pending OTP that needs verification
+                            $hasPendingOtp = !empty($user->otp);
+                            $otpExpired = false;
+                            
+                            // Check if OTP is expired (if column exists)
+                            if ($hasPendingOtp && isset($user->otp_expires_at) && $user->otp_expires_at) {
+                                try {
+                                    if (Carbon::now()->gt(Carbon::parse($user->otp_expires_at))) {
+                                        $otpExpired = true;
+                                        // Clear expired OTP
+                                        $this->updateData([
+                                            'otp' => null,
+                                            'otp_expires_at' => null
+                                        ], 'user', ['id' => $user->id]);
+                                    }
+                                } catch (\Exception $e) {
+                                    \Log::warning('OTP expiration check failed: ' . $e->getMessage());
+                                }
+                            }
+                            
+                            // If user has pending OTP that hasn't expired, require verification
+                            if ($hasPendingOtp && !$otpExpired) {
+                                return response()->json([
+                                    'status' => 'verify',
+                                    'message' => 'OTP verification required',
+                                    'user' => $user_details
+                                ]);
+                            }
+                            
+                            // User is verified and has no pending OTP
                             return response()->json([
                                 'status' => 'success',
                                 'message' => 'account verified',
@@ -355,50 +395,83 @@ class AuthController extends Controller
                 $this->monnify_account($user->username);
                 $this->insert_stock($user->username);
                 $user = DB::table('user')->where(['id' => $user->id])->first();
-                $user_details = [
-                    'username' => $user->username,
-                    'name' => $user->name,
-                    'phone' => $user->phone,
-                    'email' => $user->email,
-                    'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                    'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
-                    'kyc' => $user->kyc,
-                    'type' => $user->type,
-                    'pin' => $user->pin,
-                    'profile_image' => $user->profile_image,
-                    'sterlen' => $user->sterlen,
-                    'fed' => $user->fed,
-                    'wema' => $user->wema,
-                    'rolex' => $user->rolex,
-                    'address' => $user->address,
-                    'webhook' => $user->webhook,
-                    'vdf' => $user->vdf,
-                    'about' => $user->about,
-                    'apikey' => $user->apikey,
-                    'is_bvn' => $user->bvn == null ? false : true
-                ];
+                $user_details = $this->getUserDetailsWithBellBank($user);
+                // Check if OTP is expired (if column exists)
+                if (isset($user->otp_expires_at) && $user->otp_expires_at) {
+                    try {
+                        if (Carbon::now()->gt(Carbon::parse($user->otp_expires_at))) {
+                            return response()->json([
+                                'status' => 403,
+                                'message' => 'OTP has expired. Please request a new one.'
+                            ])->setStatusCode(403);
+                        }
+                    } catch (\Exception $e) {
+                        // If parsing fails, continue with verification
+                        \Log::warning('OTP expiration check failed: ' . $e->getMessage());
+                    }
+                }
+                
                 if ($user->otp == $request->code) {
+                    // Check if this is a new user verification (status = 0) or login verification (status = 1)
+                    $isNewUser = $user->status == 0;
+                    
                     //if success
                     $data = [
                         'status' => '1',
-                        'otp' => null
+                        'otp' => null,
+                        'otp_expires_at' => null
                     ];
                     $tableid = [
                         'id' => $user->id
                     ];
                     $general = $this->general();
                     $this->updateData($data, 'user', $tableid);
-                    $email_data = [
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'username' => $user->username,
-                        'title' => 'WELCOME EMAIL',
-                        'sender_mail' => $general->app_email,
-                        'system_email' => $general->app_email,
-                        'app_name' => $general->app_name,
-                        'pin' => $user->pin,
-                    ];
-                    MailController::send_mail($email_data, 'email.welcome');
+                    
+                    // STEP 4: Only after OTP success → mark device as trusted
+                    // Store device as trusted after OTP verification
+                    try {
+                        $this->storeDeviceInfo($user->id, $request, true);
+                        \Log::info('Device marked as trusted after OTP verification', [
+                            'user_id' => $user->id,
+                            'device_fingerprint' => substr($this->generateDeviceFingerprint($request), 0, 20) . '...'
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to store device info: ' . $e->getMessage());
+                    }
+                    
+                    // Only send welcome email for new users (first time verification), not for login OTP verification
+                    if ($isNewUser) {
+                        $email_data = [
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'username' => $user->username,
+                            'title' => 'WELCOME EMAIL',
+                            'sender_mail' => $general->app_email,
+                            'system_email' => $general->app_email,
+                            'app_name' => $general->app_name,
+                            'pin' => $user->pin,
+                        ];
+                        try {
+                            MailController::send_mail($email_data, 'email.welcome');
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to send welcome email: ' . $e->getMessage());
+                        }
+                        
+                        // Create BellBank virtual account for new user (after successful verification)
+                        try {
+                            $userModel = \App\Models\User::find($user->id);
+                            if ($userModel) {
+                                \App\Jobs\CreateBellBankVirtualAccount::dispatch($userModel);
+                                \Log::info('BellBank virtual account creation job dispatched', [
+                                    'user_id' => $user->id,
+                                    'username' => $user->username,
+                                ]);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to dispatch BellBank virtual account creation: ' . $e->getMessage());
+                        }
+                    }
+                    
                     return response()->json([
                         'status' => 'success',
                         'message' => 'account verified',
@@ -437,7 +510,7 @@ class AuthController extends Controller
                 'username' => 'required|string',
                 'password' => 'required'
             ], [
-                'username.required' => 'Your Username or Phone Number or Email is Required',
+                'username.required' => 'Your Phone Number or Email is Required',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -445,9 +518,212 @@ class AuthController extends Controller
                     'message' => $validator->errors()->first()
                 ])->setStatusCode(403);
             } else {
-                $check_system = User::where('username', $request->username);
+                // Allow login with phone or email only (username removed)
+                $check_system = User::where(function($query) use ($request) {
+                    $query->where('phone', $request->username)
+                          ->orWhere('email', $request->username);
+                });
                 if ($check_system->count() == 1) {
                     $user = $check_system->get()[0];
+                    
+                    // STEP 1: Always verify password first - DO NOT mark device trusted yet
+                    $hash = substr(sha1(md5($request->password)), 3, 10);
+                    $mdpass = md5($request->password);
+                    $passwordValid = (password_verify($request->password, $user->password)) 
+                        || ($request->password == $user->password) 
+                        || ($hash == $user->password) 
+                        || ($mdpass == $user->password);
+                    
+                    if (!$passwordValid) {
+                        return response()->json([
+                            'status' => 403,
+                            'message' => 'Invalid Phone Number, Email or Password'
+                        ])->setStatusCode(403);
+                    }
+                    
+                    // Check user status
+                    if ($user->status == 2) {
+                        return response()->json([
+                            'status' => 403,
+                            'message' => $user->username . ' Your Account Has Been Banned'
+                        ])->setStatusCode(403);
+                    } else if ($user->status == 3) {
+                        return response()->json([
+                            'status' => 403,
+                            'message' => $user->username . ' Your Account Has Been Deactivated'
+                        ])->setStatusCode(403);
+                    } else if ($user->status == 0) {
+                        // Account not verified
+                        $user_details = [
+                            'username' => $user->username,
+                            'name' => $user->name,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'bal' => (float) $user->bal,
+                            'refbal' => (float) $user->refbal,
+                            'kyc' => $user->kyc,
+                            'type' => $user->type,
+                            'pin' => $user->pin,
+                            'profile_image' => $user->profile_image,
+                            'sterlen' => $user->sterlen,
+                            'fed' => $user->fed,
+                            'wema' => $user->wema,
+                            'rolex' => $user->rolex,
+                            'address' => $user->address,
+                            'webhook' => $user->webhook,
+                            'about' => $user->about,
+                            'vdf' => $user->vdf,
+                            'apikey' => $user->apikey,
+                            'is_bvn' => $user->bvn == null ? false : true
+                        ];
+                        return response()->json([
+                            'status' => 'verify',
+                            'message' => $user->username . ' Your Account Not Yet verified',
+                            'user' => $user_details,
+                            'token' => $this->generatetoken($user->id),
+                        ]);
+                    }
+                    
+                    // Password is valid, user status is 1 (active)
+                    // STEP 2: Check session status
+                    $deviceFingerprint = $this->generateDeviceFingerprint($request);
+                    $device = DB::table('user_devices')
+                        ->where('user_id', $user->id)
+                        ->where('device_fingerprint', $deviceFingerprint)
+                        ->where('is_trusted', 1)
+                        ->first();
+                    
+                    $isTrustedDevice = $device !== null;
+                    
+                    // Per user requirement: "OTP must NEVER be skipped after password login"
+                    // So we ALWAYS require OTP after password verification
+                    // Auto-login with token should be handled in account/my-account endpoint
+                    $requiresOtp = true; // ALWAYS require OTP after password login
+                    
+                    // Check inactivity (for logging purposes only)
+                    $hoursSinceActivity = null;
+                    if ($isTrustedDevice && $device && $device->last_login_at) {
+                        $lastActivity = Carbon::parse($device->last_login_at);
+                        $hoursSinceActivity = Carbon::now()->diffInHours($lastActivity);
+                    }
+                    
+                    // Log for debugging
+                    \Log::info('Login attempt after password verification', [
+                        'user_id' => $user->id,
+                        'username' => $user->username,
+                        'device_fingerprint' => substr($deviceFingerprint, 0, 20) . '...',
+                        'is_trusted_device' => $isTrustedDevice ? 'YES' : 'NO',
+                        'requires_otp' => 'YES (always after password login)',
+                        'hours_since_activity' => $hoursSinceActivity ?? 'N/A',
+                        'ip' => $request->ip(),
+                        'user_agent' => substr($request->header('User-Agent', ''), 0, 50),
+                        'last_activity' => $device->last_login_at ?? 'N/A'
+                    ]);
+                    
+                    // STEP 3: ALWAYS send OTP after password login (never skip)
+                    // OTP must NEVER be skipped after password login
+                    if ($requiresOtp) {
+                        // Generate new OTP for new device only
+                        $otp = random_int(100000, 999999);
+                        
+                        // Get device details
+                        $userAgent = $request->header('User-Agent', '');
+                        $ipAddress = $request->ip();
+                        $browser = 'Unknown';
+                        $os = 'Unknown';
+                        
+                        // Simple browser detection
+                        if (strpos($userAgent, 'Chrome') !== false) {
+                            $browser = 'Chrome';
+                        } elseif (strpos($userAgent, 'Firefox') !== false) {
+                            $browser = 'Firefox';
+                        } elseif (strpos($userAgent, 'Safari') !== false) {
+                            $browser = 'Safari';
+                        } elseif (strpos($userAgent, 'Edge') !== false) {
+                            $browser = 'Edge';
+                        }
+                        
+                        // Simple OS detection
+                        if (strpos($userAgent, 'Windows') !== false) {
+                            $os = 'Windows';
+                        } elseif (strpos($userAgent, 'Mac') !== false) {
+                            $os = 'macOS';
+                        } elseif (strpos($userAgent, 'Linux') !== false) {
+                            $os = 'Linux';
+                        } elseif (strpos($userAgent, 'Android') !== false) {
+                            $os = 'Android';
+                        } elseif (strpos($userAgent, 'iOS') !== false || strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false) {
+                            $os = 'iOS';
+                        }
+                        
+                        // Save OTP with expiration (60 seconds)
+                        $otpExpiresAt = Carbon::now()->addSeconds(60);
+                        $this->updateData([
+                            'otp' => $otp,
+                            'otp_expires_at' => $otpExpiresAt
+                        ], 'user', ['id' => $user->id]);
+                        
+                        $message = 'OTP sent to your email for verification.';
+                        
+                        // Send OTP email only for new device (not for logout OTP)
+                        $general = $this->general();
+                        $email_data = [
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'username' => $user->username,
+                            'title' => 'OTP for Login Attempt',
+                            'sender_mail' => $general->app_email ?? 'noreply@kobopoint.com',
+                            'app_name' => $general->app_name ?? env('APP_NAME', 'KoboPoint'),
+                            'otp' => $otp,
+                            'app_url' => env('APP_URL'),
+                            'browser' => $browser,
+                            'os' => $os,
+                            'ip_address' => $ipAddress,
+                            'device_info' => $browser . ' on ' . $os
+                        ];
+                        
+                        try {
+                            MailController::send_mail($email_data, 'email.otp_verification');
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to send OTP email: ' . $e->getMessage());
+                        }
+                        
+                        // Return user details and token for OTP verification
+                        $user = DB::table('user')->where(['id' => $user->id])->first();
+                        $user_details = [
+                            'username' => $user->username,
+                            'name' => $user->name,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'bal' => (float) $user->bal,
+                            'refbal' => (float) $user->refbal,
+                            'kyc' => $user->kyc,
+                            'type' => $user->type,
+                            'pin' => $user->pin,
+                            'profile_image' => $user->profile_image,
+                            'sterlen' => $user->sterlen,
+                            'fed' => $user->fed,
+                            'wema' => $user->wema,
+                            'rolex' => $user->rolex,
+                            'address' => $user->address,
+                            'webhook' => $user->webhook,
+                            'about' => $user->about,
+                            'vdf' => $user->vdf,
+                            'apikey' => $user->apikey,
+                            'is_bvn' => $user->bvn == null ? false : true
+                        ];
+                        
+                        $token = $this->generatetoken($user->id);
+                        return response()->json([
+                            'status' => 'verify',
+                            'message' => $message,
+                            'user' => $user_details,
+                            'token' => $token
+                        ]);
+                    }
+                    
+                    // This code should never be reached since we always require OTP after password login
+                    // But just in case, return verify status
                     $this->monnify_account($user->username);
                     $this->insert_stock($user->username);
                     $user = DB::table('user')->where(['id' => $user->id])->first();
@@ -456,8 +732,8 @@ class AuthController extends Controller
                         'name' => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
-                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                        'bal' => (float) $user->bal,
+                        'refbal' => (float) $user->refbal,
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -473,52 +749,19 @@ class AuthController extends Controller
                         'apikey' => $user->apikey,
                         'is_bvn' => $user->bvn == null ? false : true
                     ];
-                    $hash = substr(sha1(md5($request->password)), 3, 10);
-                    $mdpass = md5($request->password);
-                    if ((password_verify($request->password, $user->password)) xor ($request->password == $user->password) xor ($hash == $user->password) xor ($mdpass == $user->password)) {
-                        //  if(Hash::check($request->password, $user->password)){
-                        if ($user->status == 1) {
-                            return response()->json([
-                                'status' => 'success',
-                                'message' => 'Login successfully',
-                                'user' => $user_details,
-                                'token' => $this->generatetoken($user->id)
-                            ]);
-                        } else if ($user->status == 2) {
-                            return response()->json([
-                                'status' => 403,
-                                'message' => $user->username . ' Your Account Has Been Banned'
-                            ])->setStatusCode(403);
-                        } else if ($user->status == 3) {
-                            return response()->json([
-                                'status' => 403,
-                                'message' => $user->username . ' Your Account Has Been Deactivated'
-                            ])->setStatusCode(403);
-                        } else if ($user->status == 0) {
-                            return response()->json([
-                                'status' => 'verify',
-                                'message' => $user->username . ' Your Account Not Yet verified',
-                                'user' => $user_details,
-                                'token' => $this->generatetoken($user->id),
-                            ]);
-                        } else {
-                            return response()->json([
-                                'status' => 403,
-                                'message' => 'System is unable to verify user'
-
-                            ])->setStatusCode(403);
-                        }
-                    } else {
+                    
+                    // Always require OTP after password login - return verify status
+                    return response()->json([
+                        'status' => 'verify',
+                        'message' => 'OTP verification required. Please check your email.',
+                        'user' => $user_details,
+                        'token' => $this->generatetoken($user->id)
+                    ]);
+                } else {
                         return response()->json([
                             'status' => 403,
-                            'message' => 'Invalid Password Note Password is Case Sensitive'
+                            'message' => 'Invalid Phone Number, Email or Password'
                         ])->setStatusCode(403);
-                    }
-                } else {
-                    return response()->json([
-                        'status' => 403,
-                        'message' => 'Invalid Username and Password'
-                    ])->setStatusCode(403);
                 }
             }
         } else {
@@ -579,6 +822,249 @@ class AuthController extends Controller
                 'message' => 'Unable to Authenticate System',
 
             ])->setStatusCode(403);
+        }
+    }
+
+    /**
+     * Logout user - destroy session and device trust, force OTP next login
+     */
+    public function logout(Request $request)
+    {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|string'
+            ], [
+                'id.required' => 'User token is required',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => $validator->errors()->first()
+                ])->setStatusCode(403);
+            }
+            
+            $user_token = $request->id;
+            $real_token = $this->verifytoken($user_token);
+            
+            if (!is_null($real_token)) {
+                // STEP 4: On logout - destroy session and device trust
+                try {
+                    // Clear OTP
+                    $this->updateData([
+                        'otp' => null,
+                        'otp_expires_at' => null
+                    ], 'user', ['id' => $real_token]);
+                    
+                    // Get device fingerprint
+                    $deviceFingerprint = $this->generateDeviceFingerprint($request);
+                    
+                    // Delete trusted-device record (force OTP next login)
+                    DB::table('user_devices')
+                        ->where('user_id', $real_token)
+                        ->where('device_fingerprint', $deviceFingerprint)
+                        ->update([
+                            'is_trusted' => 0,
+                            'last_login_at' => null
+                        ]);
+                    
+                    \Log::info('User logged out', [
+                        'user_id' => $real_token,
+                        'device_fingerprint' => substr($deviceFingerprint, 0, 20) . '...',
+                        'device_trust_cleared' => true
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to clear session on logout: ' . $e->getMessage());
+                }
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Logged out successfully. OTP will be required on next login.'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Invalid token'
+                ])->setStatusCode(403);
+            }
+        } else {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Unable to Authenticate System'
+            ])->setStatusCode(403);
+        }
+    }
+
+    /**
+     * Generate device fingerprint from request
+     */
+    private function generateDeviceFingerprint(Request $request)
+    {
+        $userAgent = $request->header('User-Agent', '');
+        $ip = $request->ip();
+        $acceptLanguage = $request->header('Accept-Language', '');
+        $acceptEncoding = $request->header('Accept-Encoding', '');
+        
+        // Create a unique fingerprint
+        $fingerprint = hash('sha256', $userAgent . $ip . $acceptLanguage . $acceptEncoding);
+        
+        return $fingerprint;
+    }
+
+    /**
+     * Check if device is trusted
+     */
+    private function isDeviceTrusted($userId, $deviceFingerprint)
+    {
+        $device = DB::table('user_devices')
+            ->where('user_id', $userId)
+            ->where('device_fingerprint', $deviceFingerprint)
+            ->where('is_trusted', 1)
+            ->first();
+            
+        return $device !== null;
+    }
+
+    /**
+     * Store or update device information
+     */
+    private function storeDeviceInfo($userId, Request $request, $isTrusted = false)
+    {
+        $deviceFingerprint = $this->generateDeviceFingerprint($request);
+        
+        // Parse user agent
+        $userAgent = $request->header('User-Agent', '');
+        $browser = 'Unknown';
+        $os = 'Unknown';
+        $deviceType = 'desktop';
+        
+        // Simple browser detection
+        if (strpos($userAgent, 'Chrome') !== false) {
+            $browser = 'Chrome';
+        } elseif (strpos($userAgent, 'Firefox') !== false) {
+            $browser = 'Firefox';
+        } elseif (strpos($userAgent, 'Safari') !== false) {
+            $browser = 'Safari';
+        } elseif (strpos($userAgent, 'Edge') !== false) {
+            $browser = 'Edge';
+        }
+        
+        // Simple OS detection
+        if (strpos($userAgent, 'Windows') !== false) {
+            $os = 'Windows';
+        } elseif (strpos($userAgent, 'Mac') !== false) {
+            $os = 'macOS';
+        } elseif (strpos($userAgent, 'Linux') !== false) {
+            $os = 'Linux';
+        } elseif (strpos($userAgent, 'Android') !== false) {
+            $os = 'Android';
+            $deviceType = 'mobile';
+        } elseif (strpos($userAgent, 'iOS') !== false || strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false) {
+            $os = 'iOS';
+            $deviceType = strpos($userAgent, 'iPad') !== false ? 'tablet' : 'mobile';
+        }
+        
+        // Check if device exists
+        $existingDevice = DB::table('user_devices')
+            ->where('user_id', $userId)
+            ->where('device_fingerprint', $deviceFingerprint)
+            ->first();
+            
+        if ($existingDevice) {
+            // Update last login and activity
+            DB::table('user_devices')
+                ->where('id', $existingDevice->id)
+                ->update([
+                    'last_login_at' => Carbon::now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $userAgent,
+                    'is_trusted' => $isTrusted ? 1 : $existingDevice->is_trusted, // Only update if explicitly setting to trusted
+                    'updated_at' => Carbon::now()
+                ]);
+        } else {
+            // Create new device record
+            DB::table('user_devices')->insert([
+                'user_id' => $userId,
+                'device_fingerprint' => $deviceFingerprint,
+                'browser' => $browser,
+                'os' => $os,
+                'device_type' => $deviceType,
+                'ip_address' => $request->ip(),
+                'user_agent' => $userAgent,
+                'is_trusted' => $isTrusted ? 1 : 0,
+                'last_login_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+        }
+        
+        return $deviceFingerprint;
+    }
+
+    /**
+     * Get user details with BellBank account info
+     */
+    protected function getUserDetailsWithBellBank($user)
+    {
+        // Get BellBank virtual account
+        $bellAccount = \App\Models\BellAccount::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+        
+        $user_details = [
+            'username' => $user->username,
+            'name' => $user->name,
+            'phone' => $user->phone,
+            'email' => $user->email,
+            'bal' => (float) $user->bal,
+            'refbal' => (float) $user->refbal,
+            'kyc' => $user->kyc,
+            'type' => $user->type,
+            'pin' => $user->pin,
+            'profile_image' => $user->profile_image,
+            'sterlen' => $user->sterlen,
+            'fed' => $user->fed,
+            'wema' => $user->wema,
+            'rolex' => $user->rolex,
+            'vdf' => $user->vdf,
+            'address' => $user->address,
+            'webhook' => $user->webhook,
+            'about' => $user->about,
+            'apikey' => $user->apikey,
+            'is_bvn' => $user->bvn == null ? false : true,
+            'bellbank_account' => $bellAccount ? [
+                'account_number' => $bellAccount->account_number,
+                'bank_name' => $bellAccount->bank_name ?: 'BellBank',
+                'account_name' => isset($bellAccount->metadata['accountName']) ? $bellAccount->metadata['accountName'] : $user->username,
+                'status' => $bellAccount->status,
+            ] : null
+        ];
+        
+        return $user_details;
+    }
+
+    /**
+     * Update device activity timestamp
+     */
+    private function updateDeviceActivity($userId, $deviceFingerprint, Request $request)
+    {
+        $existingDevice = DB::table('user_devices')
+            ->where('user_id', $userId)
+            ->where('device_fingerprint', $deviceFingerprint)
+            ->first();
+            
+        if ($existingDevice) {
+            DB::table('user_devices')
+                ->where('id', $existingDevice->id)
+                ->update([
+                    'last_login_at' => Carbon::now(),
+                    'ip_address' => $request->ip(),
+                    'updated_at' => Carbon::now()
+                ]);
         }
     }
 }

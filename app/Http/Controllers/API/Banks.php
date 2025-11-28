@@ -14,10 +14,16 @@ class  Banks extends Controller
 {
  public function GetBanksArray(Request $request)
 {
-       $allowedOrigins = explode(',', config('adex.app_key'));
-       $origin = $request->header('Origin');
+       $allowedOrigins = array_filter(array_map('trim', explode(',', env('ADEX_APP_KEY', ''))));
+       $origin = rtrim($request->header('Origin', ''), '/');
        $authorization = $request->header('Authorization');
-       if (in_array($origin, $allowedOrigins) || config('adex.device_key') === $authorization) {
+       
+       // Normalize origins for comparison (remove trailing slashes)
+       $normalizedOrigins = array_map(function($url) {
+           return rtrim($url, '/');
+       }, $allowedOrigins);
+       
+       if (in_array($origin, $normalizedOrigins) || env('ADEX_DEVICE_KEY') === $authorization) {
         if (!empty($request->id)) {
            $auth_user = DB::table('user')->where('status', 1)->where(function($query) use ($request) {
            $query->orWhere('id', $this->verifytoken($request->id))
@@ -29,15 +35,35 @@ class  Banks extends Controller
             if(!$auth_user){
                 return response()->json(['message' => 'Unable to singin user', 'status' => 'fail'], 403);
             }
+            
+            // BELLBANK - Default and Primary Payment Gateway (Always First)
+            $bellAccount = \App\Models\BellAccount::where('user_id', $auth_user->id)
+                ->where('status', 'active')
+                ->first();
+            
+            if ($bellAccount && $bellAccount->account_number) {
+                $banks_array[] = [
+                    "name" => $bellAccount->bank_name ?: "BELLBANK",
+                    "account" => $bellAccount->account_number,
+                    "accountType" => false, // Account is ready
+                    'charges' => '0 NAIRA', // No charges for BellBank transfers
+                    'isDefault' => true, // Mark as default
+                    'accountName' => $auth_user->username, // User's account name
+                ];
+            }
+            
             // Use dynamic charges from settings
             $palmpay_charge = isset($setting->palmpay_charge) ? $setting->palmpay_charge : 15;
             $monnify_charge = isset($setting->monnify_charge) ? $setting->monnify_charge : 20;
+            
+            // Other payment methods (secondary/optional)
             if (!is_null($auth_user->palmpay)) {
                 $banks_array[] = [
                     "name" => "PALMPAY",
                     "account" => $auth_user->palmpay,
                     "accountType" => $auth_user->palmpay === null,
                     'charges' => $palmpay_charge . ' NAIRA',
+                    'isDefault' => false,
                 ];
             }
             // Only add Moniepoint if it is not hardcoded as WEMA
@@ -47,14 +73,16 @@ class  Banks extends Controller
                     "account" => $auth_user->wema,
                     "accountType" => $auth_user->wema === null,
                     'charges' => $monnify_charge . ' NAIRA',
+                    'isDefault' => false,
                 ];
             }
-            if (isset($auth_user->paystack_account) && !is_null($auth_user->paystack_account)) {
+            if (!is_null($auth_user->paystack_account)) {
                 $banks_array[] = [
                     "name" => "PAYSTACK",
                     "account" => $auth_user->paystack_account,
                     "accountType" => false,
                     'charges' => '0 NAIRA', // You can make this dynamic if needed
+                    'isDefault' => false,
                 ];
             }
 

@@ -38,7 +38,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL') ? env('APP_URL').'/storage' : null, // Will auto-detect if null
+            'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
 
@@ -68,7 +68,6 @@ return [
 
     'links' => [
         public_path('profile_image') => storage_path('app/profile_image'),
-        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

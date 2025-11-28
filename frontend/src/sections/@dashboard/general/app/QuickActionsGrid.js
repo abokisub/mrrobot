@@ -140,28 +140,36 @@ export default function QuickActionsGrid() {
     ];
 
     return (
-        <Stack spacing={2} sx={{ width: '100%' }}>
+        <Stack spacing={2} sx={{ width: '100%', px: { xs: 0.5, sm: 0 } }}>
             {/* Main Actions Row */}
             <Grid 
                 container 
-                spacing={1.5} 
+                spacing={{ xs: 1, sm: 1.5 }} 
                 sx={{ 
                     mb: 1.5,
-                    mx: 0, // Remove horizontal margin
                     width: '100%',
                 }}
             >
-                {MAIN_ACTIONS.map((action) => (
+                {MAIN_ACTIONS.map((action, index) => (
                     <Grid 
                         item 
                         xs={4} 
                         key={action.title}
                         sx={{
-                            px: 0, // Remove horizontal padding
+                            px: { 
+                                xs: index === 0 ? 0 : 0.25, // First item: no left padding
+                                sm: 0 
+                            },
                             display: 'flex',
                         }}
                     >
-                        <MainActionCard onClick={() => navigate(action.path)} sx={{ width: '100%' }}>
+                        <MainActionCard 
+                            onClick={() => navigate(action.path)} 
+                            sx={{ 
+                                width: '100%',
+                                px: { xs: 1.5, sm: 2 }, // Responsive padding inside card
+                            }}
+                        >
                             <MainIconWrapper>
                                 <Iconify icon={action.icon} width={28} height={28} />
                             </MainIconWrapper>
@@ -169,7 +177,7 @@ export default function QuickActionsGrid() {
                                 variant="subtitle2" 
                                 sx={{ 
                                     fontWeight: 600, 
-                                    fontSize: '0.85rem', 
+                                    fontSize: { xs: '0.8rem', sm: '0.85rem' }, 
                                     whiteSpace: 'nowrap',
                                     color: 'text.primary',
                                 }}
@@ -184,23 +192,31 @@ export default function QuickActionsGrid() {
             {/* Services Grid */}
             <Grid 
                 container 
-                spacing={1}
+                spacing={{ xs: 0.75, sm: 1 }}
                 sx={{
-                    mx: 0, // Remove horizontal margin
                     width: '100%',
                 }}
             >
-                {SERVICES.map((service) => (
+                {SERVICES.map((service, index) => (
                     <Grid 
                         item 
                         xs={3} 
                         key={service.title}
                         sx={{
-                            px: 0, // Remove horizontal padding
+                            px: { 
+                                xs: index === 0 ? 0 : 0.25, // First item: no left padding
+                                sm: 0 
+                            },
                             display: 'flex',
                         }}
                     >
-                        <ServiceItem onClick={() => navigate(service.path)} sx={{ width: '100%' }}>
+                        <ServiceItem 
+                            onClick={() => navigate(service.path)} 
+                            sx={{ 
+                                width: '100%',
+                                px: { xs: 0.75, sm: 0.5 }, // Responsive padding inside card
+                            }}
+                        >
                             <ServiceIconWrapper>
                                 <Iconify icon={service.icon} width={24} height={24} />
                             </ServiceIconWrapper>
@@ -210,7 +226,7 @@ export default function QuickActionsGrid() {
                                     fontWeight: 500, 
                                     textAlign: 'center', 
                                     lineHeight: 1.2,
-                                    fontSize: '0.75rem',
+                                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
                                     color: 'text.primary',
                                 }}
                             >

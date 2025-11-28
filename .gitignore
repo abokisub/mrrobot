@@ -15,6 +15,6 @@ yarn-error.log
 /.vscode
 
 # Exclude frontend folder (too large - 5GB)
-/frontend
-frontend/
-frontend/**
+# /frontend
+# # frontend/
+# # frontend/**

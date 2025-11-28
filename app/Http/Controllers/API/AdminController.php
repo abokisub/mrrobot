@@ -88,13 +88,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -234,13 +230,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -432,13 +424,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -485,13 +473,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -677,13 +661,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -719,13 +699,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1196,13 +1172,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1304,13 +1276,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1385,13 +1353,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1456,13 +1420,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1520,13 +1480,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1580,13 +1536,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1644,13 +1596,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1719,13 +1667,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1890,13 +1834,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -1991,13 +1931,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2090,13 +2026,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2164,13 +2096,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2228,13 +2156,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2302,13 +2226,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2361,13 +2281,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2420,13 +2336,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2497,13 +2409,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2565,13 +2473,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2622,13 +2526,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2675,13 +2575,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2728,13 +2624,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2785,13 +2677,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2866,13 +2754,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2913,13 +2797,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -2960,13 +2840,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -3000,13 +2876,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -3049,13 +2921,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([
@@ -3119,13 +2987,9 @@ class  AdminController extends Controller
                 }
             } else {
                 return response()->json([
-                'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                    'status' => 'fail',
+                    'message' => 'User ID required'
+                ], 403);
             }
         } else {
             return response()->json([

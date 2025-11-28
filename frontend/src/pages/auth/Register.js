@@ -104,15 +104,6 @@ export default function Register() {
                 >
                   Create account
                 </Typography>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'text.secondary',
-                    fontSize: { xs: '0.875rem', md: '0.9rem' }
-                  }}
-                >
-                  Complete your onboarding in 4 quick steps and Get started with seamless transactions today
-                </Typography>
               </Box>
 
               {/* Register Form */}

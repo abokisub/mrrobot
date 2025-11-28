@@ -15,11 +15,7 @@ class  AdminController extends Controller
 
     public function userRequest(Request $request)
     {
-        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
-        $origin = $request->headers->get('origin');
-        $originNormalized = rtrim($origin ?: '', '/');
-        
-        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
 
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {

@@ -263,10 +263,8 @@ export default function RegisterForm() {
               <RHFRadioGroup
                 name="gender"
                 row
-                options={[
-                  { value: 'male', label: 'Male' },
-                  { value: 'female', label: 'Female' },
-                ]}
+                options={['male', 'female']}
+                getOptionLabel={['Male', 'Female']}
               />
             </FormControl>
           </Stack>

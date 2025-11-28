@@ -129,7 +129,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -275,7 +278,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -338,7 +344,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -401,7 +410,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -543,7 +555,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -581,14 +596,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -724,14 +745,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -779,14 +806,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -911,14 +944,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -956,14 +995,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1008,14 +1053,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1103,14 +1154,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1187,14 +1244,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1232,14 +1295,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1284,14 +1353,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1375,14 +1450,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1457,14 +1538,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1509,14 +1596,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1578,14 +1671,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1631,14 +1730,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1679,14 +1784,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1727,14 +1838,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1780,14 +1897,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1838,14 +1961,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1890,14 +2019,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1978,14 +2113,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2023,14 +2164,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2087,14 +2234,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2122,14 +2275,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2239,14 +2398,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2308,14 +2473,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2366,14 +2537,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2420,14 +2597,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2473,14 +2656,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2546,14 +2735,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2588,14 +2783,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2653,14 +2854,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2684,14 +2891,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2709,7 +2922,10 @@ class  SecureController extends Controller
                 'app' => DB::table('app_download')->get()
             ]);
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -2745,14 +2961,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -2789,14 +3011,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -2831,14 +3059,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -2872,14 +3106,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -2915,14 +3155,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -2956,14 +3202,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -3004,14 +3256,20 @@ class  SecureController extends Controller
                         ])->setStatusCode(403);
                     }
                 } else {
-                    return redirect(config('adex.error_500', '/500'));
+                    return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Authenticate System'
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
@@ -3048,7 +3306,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -3086,7 +3347,10 @@ class  SecureController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -3130,14 +3394,20 @@ class  SecureController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500', '/500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'

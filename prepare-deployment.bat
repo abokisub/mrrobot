@@ -29,6 +29,19 @@ if exist "public\build" rmdir /s /q "public\build"
 
 REM Copy build files
 xcopy /E /I /Y "frontend\build\*" "public\"
+
+REM Copy service-worker.js if it exists in build
+if exist "frontend\build\service-worker.js" (
+    copy /Y "frontend\build\service-worker.js" "public\service-worker.js"
+    echo ✓ service-worker.js copied
+)
+
+REM Copy manifest.json if it exists in build
+if exist "frontend\build\manifest.json" (
+    copy /Y "frontend\build\manifest.json" "public\manifest.json"
+    echo ✓ manifest.json copied
+)
+
 echo ✓ React files copied to public\
 
 REM Step 3: Create cPanel index.php

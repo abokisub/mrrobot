@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 // Specific routes first (before catch-all)
 Route::any('vdf_auto_fund_adex', [PaymentController::class, 'VDFWEBHOOK']);
+
 Route::get('/cache', function () {
     return Cache::flush();
 });
@@ -73,11 +74,7 @@ Route::get('/', function () {
 // Catch-all route for React Router - MUST be last
 Route::get('/{any}', function ($any) {
     // Skip API routes and static files (these are handled by .htaccess and api.php)
-    if (strpos($any, 'api/') === 0 || 
-        strpos($any, 'storage/') === 0 || 
-        strpos($any, 'static/') === 0 ||
-        $any === 'service-worker.js' ||
-        $any === 'manifest.json') {
+    if (strpos($any, 'api/') === 0 || strpos($any, 'storage/') === 0 || strpos($any, 'static/') === 0) {
         abort(404);
     }
     

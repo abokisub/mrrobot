@@ -343,48 +343,46 @@ class  PlanController extends Controller
             // Get network lock status
             $networks = DB::table('network')->get()->keyBy('network');
             
-            // Helper function to filter plans by lock status
-            $filterPlansByLock = function($networkName, $planType) use ($networks) {
+            // Helper function to filter plans by lock status for a network
+            $filterNetworkPlans = function($networkName) use ($networks) {
                 $network = $networks->get($networkName);
                 if (!$network) return collect([]);
                 
-                $isLocked = false;
-                if ($planType == 'SME') {
-                    $isLocked = $network->network_sme == 0;
-                } elseif ($planType == 'COOPERATE GIFTING' || $planType == 'CG') {
-                    $isLocked = $network->network_cg == 0;
-                } elseif ($planType == 'GIFTING' || $planType == 'G') {
-                    $isLocked = $network->network_g == 0;
-                }
-                
-                if ($isLocked) return collect([]);
-                
-                return DB::table('data_plan')
-                    ->where(['network' => $networkName, 'plan_status' => 1, 'plan_type' => $planType])
-                    ->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')
+                $allPlans = DB::table('data_plan')
+                    ->where(['network' => $networkName, 'plan_status' => 1])
+                    ->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart', 'plan_type')
                     ->orderBy('smart', 'asc')
                     ->get();
+                
+                // Filter out locked plan types
+                return $allPlans->filter(function($plan) use ($network) {
+                    if ($plan->plan_type == 'SME') {
+                        return $network->network_sme == 1;
+                    } elseif ($plan->plan_type == 'COOPERATE GIFTING' || $plan->plan_type == 'CG') {
+                        return $network->network_cg == 1;
+                    } elseif ($plan->plan_type == 'GIFTING' || $plan->plan_type == 'G') {
+                        return $network->network_g == 1;
+                    }
+                    // For other plan types (like DIRECT), include them
+                    return true;
+                })->map(function($plan) {
+                    // Remove plan_type from response to match original format
+                    return (object)[
+                        'plan_name' => $plan->plan_name,
+                        'network' => $plan->network,
+                        'plan_size' => $plan->plan_size,
+                        'plan_day' => $plan->plan_day,
+                        'smart' => $plan->smart
+                    ];
+                });
             };
-            
-            // Get all unlocked plans for each network
-            $mtn_plans = collect([]);
-            $glo_plans = collect([]);
-            $airtel_plans = collect([]);
-            $mobile_plans = collect([]);
-            
-            foreach (['SME', 'COOPERATE GIFTING', 'GIFTING'] as $planType) {
-                $mtn_plans = $mtn_plans->merge($filterPlansByLock('MTN', $planType));
-                $glo_plans = $glo_plans->merge($filterPlansByLock('GLO', $planType));
-                $airtel_plans = $airtel_plans->merge($filterPlansByLock('AIRTEL', $planType));
-                $mobile_plans = $mobile_plans->merge($filterPlansByLock('9MOBILE', $planType));
-            }
             
             return response()->json([
                 'status' => 'success',
-                'mtn' => $mtn_plans->sortBy('smart')->values(),
-                'glo' => $glo_plans->sortBy('smart')->values(),
-                'airtel' => $airtel_plans->sortBy('smart')->values(),
-                'mobile' => $mobile_plans->sortBy('smart')->values()
+                'mtn' => $filterNetworkPlans('MTN')->values(),
+                'glo' => $filterNetworkPlans('GLO')->values(),
+                'airtel' => $filterNetworkPlans('AIRTEL')->values(),
+                'mobile' => $filterNetworkPlans('9MOBILE')->values()
             ]);
         } else {
             return redirect(config('adex.error_500', '/500'));

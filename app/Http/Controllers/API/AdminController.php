@@ -69,8 +69,7 @@ class  AdminController extends Controller
     }
     public function ClearRequest(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -105,8 +104,31 @@ class  AdminController extends Controller
     }
     public function UserSystem(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -114,8 +136,8 @@ class  AdminController extends Controller
                 if ($check_user->count() > 0) {
 
                     $users_info = [
-                        'wallet_balance' => DB::table('user')->sum('bal'),
-                        'ref_balance' => DB::table('user')->sum('refbal'),
+                        'wallet_balance' => DB::table('user')->sum('bal') ?: 0,
+                        'ref_balance' => DB::table('user')->sum('refbal') ?: 0,
                         'all_user' => DB::table('user')->count(),
                         'smart_total' => DB::table('user')->where('type', 'SMART')->count(),
                         'awuf_total' => DB::table('user')->where('type', 'AWUF')->count(),
@@ -128,18 +150,18 @@ class  AdminController extends Controller
                         'deactivate_user' => DB::table('user')->where('status', 3)->count(),
                         'banned_user' => DB::table('user')->where('status', 2)->count(),
                         'unverified_user' => DB::table('user')->where('status', 0)->count(),
-                        'mtn_cg_bal' => DB::table('wallet_funding')->sum('mtn_cg_bal'),
-                        'mtn_g_bal' => DB::table('wallet_funding')->sum('mtn_g_bal'),
-                        'mtn_sme_bal' => DB::table('wallet_funding')->sum('mtn_sme_bal'),
-                        'airtel_cg_bal' => DB::table('wallet_funding')->sum('airtel_cg_bal'),
-                        'airtel_g_bal' => DB::table('wallet_funding')->sum('airtel_g_bal'),
-                        'airtel_sme_bal' => DB::table('wallet_funding')->sum('airtel_sme_bal'),
-                        'glo_cg_bal' => DB::table('wallet_funding')->sum('glo_cg_bal'),
-                        'glo_g_bal' => DB::table('wallet_funding')->sum('glo_g_bal'),
-                        'glo_sme_bal' => DB::table('wallet_funding')->sum('glo_sme_bal'),
-                        'mobile_cg_bal' => DB::table('wallet_funding')->sum('mobile_cg_bal'),
-                        'mobile_g_bal' => DB::table('wallet_funding')->sum('mobile_g_bal'),
-                        'mobile_sme_bal' => DB::table('wallet_funding')->sum('mobile_sme_bal'),
+                        'mtn_cg_bal' => DB::table('wallet_funding')->sum('mtn_cg_bal') ?: 0,
+                        'mtn_g_bal' => DB::table('wallet_funding')->sum('mtn_g_bal') ?: 0,
+                        'mtn_sme_bal' => DB::table('wallet_funding')->sum('mtn_sme_bal') ?: 0,
+                        'airtel_cg_bal' => DB::table('wallet_funding')->sum('airtel_cg_bal') ?: 0,
+                        'airtel_g_bal' => DB::table('wallet_funding')->sum('airtel_g_bal') ?: 0,
+                        'airtel_sme_bal' => DB::table('wallet_funding')->sum('airtel_sme_bal') ?: 0,
+                        'glo_cg_bal' => DB::table('wallet_funding')->sum('glo_cg_bal') ?: 0,
+                        'glo_g_bal' => DB::table('wallet_funding')->sum('glo_g_bal') ?: 0,
+                        'glo_sme_bal' => DB::table('wallet_funding')->sum('glo_sme_bal') ?: 0,
+                        'mobile_cg_bal' => DB::table('wallet_funding')->sum('mobile_cg_bal') ?: 0,
+                        'mobile_g_bal' => DB::table('wallet_funding')->sum('mobile_g_bal') ?: 0,
+                        'mobile_sme_bal' => DB::table('wallet_funding')->sum('mobile_sme_bal') ?: 0,
                         'total_process' => DB::table('message')->where(['plan_status' => 0])->count(),
                         'total_data_proccess' => DB::table('data')->where(['plan_status' => 0])->count()
                     ];
@@ -156,10 +178,9 @@ class  AdminController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(config('adex.error_500', '/500'));
                 return response()->json([
                     'status' => 403,
-                    'message' => 'Unable to Authenticate System'
+                    'message' => 'User ID required'
                 ])->setStatusCode(403);
             }
         } else {
@@ -172,8 +193,7 @@ class  AdminController extends Controller
     }
     public function editUserDetails(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -221,8 +241,7 @@ class  AdminController extends Controller
     }
     public function CreateNewUser(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -414,8 +433,7 @@ class  AdminController extends Controller
     }
     public function ChangeApiKey(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -462,8 +480,7 @@ class  AdminController extends Controller
     }
     public function EditUser(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -649,8 +666,7 @@ class  AdminController extends Controller
     }
     public function FilterUser(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN')->orwhere('type', 'CUSTOMER');
@@ -686,8 +702,7 @@ class  AdminController extends Controller
     }
     public function CreditUserAdex(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN')->orwhere('type', 'CUSTOMER');
@@ -1158,8 +1173,7 @@ class  AdminController extends Controller
     }
     public function UpgradeUserAccount(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1261,8 +1275,7 @@ class  AdminController extends Controller
     }
     public function ResetUserPassword(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1337,8 +1350,7 @@ class  AdminController extends Controller
     }
     public function Automated(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1403,8 +1415,7 @@ class  AdminController extends Controller
     }
     public function BankDetails(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1462,8 +1473,7 @@ class  AdminController extends Controller
     }
     public function AddBlock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1517,8 +1527,7 @@ class  AdminController extends Controller
     }
     public function DeleteBlock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1576,8 +1585,7 @@ class  AdminController extends Controller
     }
     public function Discount(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1811,8 +1819,7 @@ class  AdminController extends Controller
     }
     public function CableCharges(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1907,8 +1914,7 @@ class  AdminController extends Controller
     }
     public function BillCharges(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2001,8 +2007,7 @@ class  AdminController extends Controller
     }
     public function CashDiscount(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2070,8 +2075,7 @@ class  AdminController extends Controller
     }
     public function ResultCharge(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2129,8 +2133,7 @@ class  AdminController extends Controller
     }
     public function OtherCharge(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2198,8 +2201,7 @@ class  AdminController extends Controller
     }
     public function RechargeCardSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2252,8 +2254,7 @@ class  AdminController extends Controller
     }
     public function DataCardSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2306,8 +2307,7 @@ class  AdminController extends Controller
     }
     public function DataSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2378,8 +2378,7 @@ class  AdminController extends Controller
     }
     public function AirtimeSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2441,8 +2440,7 @@ class  AdminController extends Controller
     }
     public function CableSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2493,8 +2491,7 @@ class  AdminController extends Controller
     }
     public function BillSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2541,8 +2538,7 @@ class  AdminController extends Controller
     }
     public function BulkSMSsel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2589,8 +2585,7 @@ class  AdminController extends Controller
     }
     public function ExamSel(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2641,8 +2636,7 @@ class  AdminController extends Controller
     }
     public function AllUsersInfo(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2717,8 +2711,7 @@ class  AdminController extends Controller
     }
     public function AllBankDetails(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2759,8 +2752,7 @@ class  AdminController extends Controller
     }
     public function UserBankAccountD(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2801,8 +2793,7 @@ class  AdminController extends Controller
     }
     public function AllUserBanned(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2836,8 +2827,7 @@ class  AdminController extends Controller
     }
     public function AllSystemPlan(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2881,8 +2871,7 @@ class  AdminController extends Controller
 
     public function ApiBalance(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->validateOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');

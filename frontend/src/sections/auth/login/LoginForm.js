@@ -19,14 +19,6 @@ import { FormProvider, RHFTextField } from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-const HintBox = styled(Box)(({ theme }) => ({
-  backgroundColor: '#FFF3E0',
-  padding: theme.spacing(1.5, 2),
-  borderRadius: theme.spacing(1),
-  marginBottom: theme.spacing(2),
-  border: '1px solid #FFE0B2',
-}));
-
 const SocialButton = styled(Button)(({ theme }) => ({
   width: 56,
   height: 56,
@@ -86,19 +78,12 @@ export default function LoginForm() {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={3}>
+      <Stack spacing={2.5}>
         {!!errors.afterSubmit && (
           <Alert severity="error" sx={{ borderRadius: 2 }}>
             {errors.afterSubmit.message}
           </Alert>
         )}
-
-        {/* Hint Box */}
-        <HintBox>
-          <Typography variant="caption" sx={{ color: '#E65100', fontSize: '0.8rem' }}>
-            Enter phone number in this format: 08012345678
-          </Typography>
-        </HintBox>
 
         {/* Email/Phone Input */}
         <RHFTextField
@@ -171,7 +156,7 @@ export default function LoginForm() {
         </SignInButton>
 
         {/* Divider with "Or sign in with" */}
-        <Box sx={{ position: 'relative', my: 2 }}>
+        <Box sx={{ position: 'relative', my: 1.5 }}>
           <Divider />
           <Typography
             variant="caption"
@@ -190,7 +175,7 @@ export default function LoginForm() {
         </Box>
 
         {/* Social Login Buttons */}
-        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 1 }}>
+        <Stack direction="row" spacing={2} justifyContent="center">
           <SocialButton>
             <Iconify icon="eva:apple-fill" width={24} height={24} />
           </SocialButton>

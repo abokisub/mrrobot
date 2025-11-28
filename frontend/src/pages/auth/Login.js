@@ -43,9 +43,9 @@ const ContentStyle = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  padding: theme.spacing(3, 2),
+  padding: theme.spacing(2, 2),
   [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(8, 4),
+    padding: theme.spacing(6, 4),
     width: '50%',
     marginLeft: 'auto',
   },
@@ -105,22 +105,22 @@ export default function Login() {
           <Container maxWidth="sm" sx={{ width: '100%' }}>
             <Box sx={{ maxWidth: 480, mx: 'auto' }}>
               {/* Title Section */}
-              <Box sx={{ mb: 4, textAlign: { xs: 'center', md: 'left' } }}>
+              <Box sx={{ mb: 3, textAlign: { xs: 'center', md: 'left' } }}>
                 <Typography 
                   variant="h3" 
                   sx={{ 
                     fontWeight: 700, 
-                    mb: 1,
-                    fontSize: { xs: '1.75rem', md: '2rem' }
+                    mb: 0.5,
+                    fontSize: { xs: '1.5rem', md: '1.75rem' }
                   }}
                 >
                   Sign In {APP_NAME}
                 </Typography>
                 <Typography 
-                  variant="body1" 
+                  variant="body2" 
                   sx={{ 
                     color: 'text.secondary',
-                    fontSize: { xs: '0.95rem', md: '1rem' }
+                    fontSize: { xs: '0.875rem', md: '0.9rem' }
                   }}
                 >
                   Hi! Welcome back, you've been missed
@@ -134,7 +134,7 @@ export default function Login() {
               <Typography 
                 variant="body2" 
                 align="center" 
-                sx={{ mt: 4, color: 'text.secondary' }}
+                sx={{ mt: 2.5, color: 'text.secondary' }}
               >
                 Don't have an account yet?{' '}
                 <Link 

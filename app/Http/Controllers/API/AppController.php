@@ -446,17 +446,50 @@ class AppController extends Controller
     }
     public function SystemNetwork(Request $request)
     {
-        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
-        $origin = $request->headers->get('origin');
-        $originNormalized = rtrim($origin ?: '', '/');
-        
-        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
-            return response()->json([
-                'status' => 'success',
-                'network' => DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get()
+        try {
+            $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+            $origin = $request->headers->get('origin');
+            $originNormalized = rtrim($origin ?: '', '/');
+            
+            // Log for debugging
+            \Log::info('SystemNetwork called', [
+                'origin' => $origin,
+                'originNormalized' => $originNormalized,
+                'allowedOrigins' => $allowedOrigins,
+                'device_key_match' => config('adex.device_key') === $request->header('Authorization'),
+                'authorization_header' => $request->header('Authorization') ? 'present' : 'missing'
             ]);
-        } else {
-            return redirect(config('adex.error_500', '/500'));
+            
+            if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+                $networks = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get();
+                
+                \Log::info('SystemNetwork success', ['network_count' => $networks->count()]);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'network' => $networks
+                ]);
+            } else {
+                \Log::warning('SystemNetwork origin mismatch', [
+                    'origin' => $origin,
+                    'originNormalized' => $originNormalized,
+                    'allowedOrigins' => $allowedOrigins
+                ]);
+                
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Origin not allowed'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            \Log::error('SystemNetwork error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'An error occurred while fetching networks'
+            ], 500);
         }
     }
 

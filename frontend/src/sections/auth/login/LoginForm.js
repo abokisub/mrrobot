@@ -89,7 +89,7 @@ export default function LoginForm() {
         <RHFTextField
           name="email"
           label="Phone Number"
-          placeholder="Enter your phone number"
+          placeholder="Phone Number/ Email"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,

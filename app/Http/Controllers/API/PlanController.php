@@ -72,6 +72,25 @@ class  PlanController extends Controller
                                 'message' => 'Network not found'
                             ])->setStatusCode(404);
                         }
+                        
+                        // Check if network type is locked
+                        $isLocked = false;
+                        if ($request->network_type == 'SME') {
+                            $isLocked = $get_network->network_sme == 0;
+                        } elseif ($request->network_type == 'COOPERATE GIFTING' || $request->network_type == 'CG') {
+                            $isLocked = $get_network->network_cg == 0;
+                        } elseif ($request->network_type == 'GIFTING' || $request->network_type == 'G') {
+                            $isLocked = $get_network->network_g == 0;
+                        }
+                        
+                        if ($isLocked) {
+                            return response()->json([
+                                'status' => 'fail',
+                                'message' => 'This network type is currently locked',
+                                'plan' => []
+                            ]);
+                        }
+                        
                         $all_plan = DB::table('data_plan')->where(['network' => $get_network->network, 'plan_type' => $request->network_type, 'plan_status' => 1]);
                         $data_plan = [];
                         if ($all_plan->count() > 0) {
@@ -182,13 +201,31 @@ class  PlanController extends Controller
                     }
 
 
+                    // Get network lock status
+                    $networks = DB::table('network')->get()->keyBy('network');
+                    
                     $all_plan = DB::table('data_plan')->where(['plan_status' => 1]);
+                    $data_plan = [];
                     if ($all_plan->count() > 0) {
                         foreach ($all_plan->get() as $adex => $plan) {
-                            $data_plan[] =  ['plan_name' => $plan->plan_name . $plan->plan_size, 'plan_id' => $plan->plan_id, 'amount' => number_format($plan->$user_type, 2), 'plan_type' => $plan->plan_type, 'plan_day' => $plan->plan_day, 'network' => $plan->network];;
+                            $network = $networks->get($plan->network);
+                            if ($network) {
+                                // Check if this plan type is locked
+                                $isLocked = false;
+                                if ($plan->plan_type == 'SME') {
+                                    $isLocked = $network->network_sme == 0;
+                                } elseif ($plan->plan_type == 'COOPERATE GIFTING' || $plan->plan_type == 'CG') {
+                                    $isLocked = $network->network_cg == 0;
+                                } elseif ($plan->plan_type == 'GIFTING' || $plan->plan_type == 'G') {
+                                    $isLocked = $network->network_g == 0;
+                                }
+                                
+                                // Only include plan if not locked
+                                if (!$isLocked) {
+                                    $data_plan[] =  ['plan_name' => $plan->plan_name . $plan->plan_size, 'plan_id' => $plan->plan_id, 'amount' => number_format($plan->$user_type, 2), 'plan_type' => $plan->plan_type, 'plan_day' => $plan->plan_day, 'network' => $plan->network];
+                                }
+                            }
                         }
-                    } else {
-                        $data_plan = [];
                     }
                     return response()->json([
                         'status' => 'success',
@@ -303,12 +340,51 @@ class  PlanController extends Controller
         $originNormalized = rtrim($origin ?: '', '/');
         
         if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+            // Get network lock status
+            $networks = DB::table('network')->get()->keyBy('network');
+            
+            // Helper function to filter plans by lock status
+            $filterPlansByLock = function($networkName, $planType) use ($networks) {
+                $network = $networks->get($networkName);
+                if (!$network) return collect([]);
+                
+                $isLocked = false;
+                if ($planType == 'SME') {
+                    $isLocked = $network->network_sme == 0;
+                } elseif ($planType == 'COOPERATE GIFTING' || $planType == 'CG') {
+                    $isLocked = $network->network_cg == 0;
+                } elseif ($planType == 'GIFTING' || $planType == 'G') {
+                    $isLocked = $network->network_g == 0;
+                }
+                
+                if ($isLocked) return collect([]);
+                
+                return DB::table('data_plan')
+                    ->where(['network' => $networkName, 'plan_status' => 1, 'plan_type' => $planType])
+                    ->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')
+                    ->orderBy('smart', 'asc')
+                    ->get();
+            };
+            
+            // Get all unlocked plans for each network
+            $mtn_plans = collect([]);
+            $glo_plans = collect([]);
+            $airtel_plans = collect([]);
+            $mobile_plans = collect([]);
+            
+            foreach (['SME', 'COOPERATE GIFTING', 'GIFTING'] as $planType) {
+                $mtn_plans = $mtn_plans->merge($filterPlansByLock('MTN', $planType));
+                $glo_plans = $glo_plans->merge($filterPlansByLock('GLO', $planType));
+                $airtel_plans = $airtel_plans->merge($filterPlansByLock('AIRTEL', $planType));
+                $mobile_plans = $mobile_plans->merge($filterPlansByLock('9MOBILE', $planType));
+            }
+            
             return response()->json([
                 'status' => 'success',
-                'mtn' => DB::table('data_plan')->where(['network' => 'MTN', 'plan_status' => 1])->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')->orderBy('smart', 'asc')->get(),
-                'glo' => DB::table('data_plan')->where(['network' => 'GLO', 'plan_status' => 1])->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')->orderBy('smart', 'asc')->get(),
-                'airtel' => DB::table('data_plan')->where(['network' => 'AIRTEL', 'plan_status' => 1])->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')->orderBy('smart', 'asc')->get(),
-                'mobile' => DB::table('data_plan')->where(['network' => '9MOBILE', 'plan_status' => 1])->select('plan_name', 'network', 'plan_size', 'plan_day', 'smart')->orderBy('smart', 'asc')->get()
+                'mtn' => $mtn_plans->sortBy('smart')->values(),
+                'glo' => $glo_plans->sortBy('smart')->values(),
+                'airtel' => $airtel_plans->sortBy('smart')->values(),
+                'mobile' => $mobile_plans->sortBy('smart')->values()
             ]);
         } else {
             return redirect(config('adex.error_500', '/500'));

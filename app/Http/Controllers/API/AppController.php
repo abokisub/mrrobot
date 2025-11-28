@@ -450,17 +450,43 @@ class AppController extends Controller
             $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
             $origin = $request->headers->get('origin');
             $originNormalized = rtrim($origin ?: '', '/');
+            $referer = $request->headers->get('referer');
+            $host = $request->getHost();
+            $scheme = $request->getScheme();
+            $fullUrl = $scheme . '://' . $host;
+            
+            // Check if request is from same origin (no Origin header for same-origin requests)
+            $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+            
+            // Also check if the referer matches any allowed origin
+            $refererMatches = false;
+            if ($referer) {
+                $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+                $refererNormalized = rtrim($refererUrl ?: '', '/');
+                $refererMatches = in_array($refererNormalized, $allowedOrigins);
+            }
             
             // Log for debugging
             \Log::info('SystemNetwork called', [
                 'origin' => $origin,
                 'originNormalized' => $originNormalized,
+                'referer' => $referer,
+                'host' => $host,
+                'fullUrl' => $fullUrl,
+                'isSameOrigin' => $isSameOrigin,
+                'refererMatches' => $refererMatches,
                 'allowedOrigins' => $allowedOrigins,
                 'device_key_match' => config('adex.device_key') === $request->header('Authorization'),
                 'authorization_header' => $request->header('Authorization') ? 'present' : 'missing'
             ]);
             
-            if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+            // Allow if: origin matches, referer matches, same-origin request, or device key matches
+            if (in_array($originNormalized, $allowedOrigins) 
+                || $refererMatches 
+                || $isSameOrigin 
+                || config('adex.device_key') === $request->header('Authorization')
+                || in_array($fullUrl, $allowedOrigins)) {
+                
                 $networks = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get();
                 
                 \Log::info('SystemNetwork success', ['network_count' => $networks->count()]);
@@ -473,6 +499,8 @@ class AppController extends Controller
                 \Log::warning('SystemNetwork origin mismatch', [
                     'origin' => $origin,
                     'originNormalized' => $originNormalized,
+                    'referer' => $referer,
+                    'fullUrl' => $fullUrl,
                     'allowedOrigins' => $allowedOrigins
                 ]);
                 

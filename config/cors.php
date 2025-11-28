@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_filter(array_map('trim', explode(',', env('ADEX_APP_KEY', '')))),
+    'allowed_origins' => array_filter(array_map('trim', explode(',', config('adex.app_key', '')))),
 
     'allowed_origins_patterns' => [],
 

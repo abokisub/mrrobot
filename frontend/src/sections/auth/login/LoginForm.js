@@ -180,13 +180,13 @@ export default function LoginForm() {
         {/* Social Login Buttons */}
         <Stack direction="row" spacing={2} justifyContent="center">
           <SocialButton>
-            <Iconify icon="eva:apple-fill" width={24} height={24} />
+            <Iconify icon="logos:apple" width={24} height={24} />
           </SocialButton>
           <SocialButton>
-            <Iconify icon="eva:google-fill" width={24} height={24} />
+            <Iconify icon="logos:google-icon" width={24} height={24} />
           </SocialButton>
           <SocialButton>
-            <Iconify icon="eva:facebook-fill" width={24} height={24} />
+            <Iconify icon="logos:facebook" width={24} height={24} />
           </SocialButton>
         </Stack>
       </Stack>

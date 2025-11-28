@@ -15,9 +15,6 @@ import {
   Typography, 
   LinearProgress,
   Button,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   FormControl,
   FormLabel,
   Link
@@ -28,7 +25,7 @@ import useAuth from '../../../hooks/useAuth';
 import useIsMountedRef from '../../../hooks/useIsMountedRef';
 // components
 import Iconify from '../../../components/Iconify';
-import { FormProvider, RHFTextField, RHFSelect } from '../../../components/hook-form';
+import { FormProvider, RHFTextField, RHFSelect, RHFRadioGroup } from '../../../components/hook-form';
 // routes
 import { PATH_AUTH } from '../../../routes/paths';
 
@@ -263,20 +260,14 @@ export default function RegisterForm() {
               <FormLabel component="legend" sx={{ mb: 1, fontWeight: 500 }}>
                 Gender
               </FormLabel>
-              <RadioGroup
-                row
+              <RHFRadioGroup
                 name="gender"
-                value={watch('gender')}
-                onChange={(e) => methods.setValue('gender', e.target.value)}
-              >
-                <FormControlLabel value="male" control={<Radio />} label="Male" />
-                <FormControlLabel value="female" control={<Radio />} label="Female" />
-              </RadioGroup>
-              {errors.gender && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                  {errors.gender.message}
-                </Typography>
-              )}
+                row
+                options={[
+                  { value: 'male', label: 'Male' },
+                  { value: 'female', label: 'Female' },
+                ]}
+              />
             </FormControl>
           </Stack>
         );

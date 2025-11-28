@@ -20,33 +20,13 @@ AdexAirtimeLock.propTypes = {
 export default function AdexAirtimeLock({ discount}) {
     const isMountedRef = useIsMountedRef();
   const NewUserSchema = Yup.object().shape({ });
-  const [mtn, setMtn] = useState('');
-  const [glo, setGlo] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [airtel, setAirtel] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const AccessToken =  window.localStorage.getItem('accessToken');
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const defaultValues = useMemo(
-    () => ({
-      mtn_vtu: mtn?.network_vtu,
-      glo_vtu: glo?.network_vtu,
-      airtel_vtu: airtel?.network_vtu,
-      mobile_vtu: mobile?.network_vtu,
-      mtn_share: mtn?.network_share,
-      glo_share: glo?.network_share,
-      airtel_share: airtel?.network_share,
-      mobile_share: mobile?.network_share,
-      mtn_cash: mtn?.cash,
-      glo_cash: glo?.cash,
-      airtel_cash: airtel?.cash,
-      mobile_cash: mobile?.cash
-    })
-  );
+  
   const {
     reset,
     setError,
@@ -55,16 +35,31 @@ export default function AdexAirtimeLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      setMtn(discount[0]);
-      setGlo(discount[1]);
-      setAirtel(discount[2]);
-      setMobile(discount[3]);
-      reset(defaultValues);
+    if (discount && Array.isArray(discount) && discount.length >= 4) {
+      // Find networks by name (case-insensitive)
+      const mtn = discount.find(n => n.network && n.network.toUpperCase() === 'MTN');
+      const glo = discount.find(n => n.network && n.network.toUpperCase() === 'GLO');
+      const airtel = discount.find(n => n.network && n.network.toUpperCase() === 'AIRTEL');
+      const mobile = discount.find(n => n.network && (n.network.toUpperCase() === '9MOBILE' || n.network.toUpperCase() === 'MOBILE'));
+      
+      // Reset form with actual values from database
+      reset({
+        mtn_vtu: mtn?.network_vtu === 1 || mtn?.network_vtu === true,
+        glo_vtu: glo?.network_vtu === 1 || glo?.network_vtu === true,
+        airtel_vtu: airtel?.network_vtu === 1 || airtel?.network_vtu === true,
+        mobile_vtu: mobile?.network_vtu === 1 || mobile?.network_vtu === true,
+        mtn_share: mtn?.network_share === 1 || mtn?.network_share === true,
+        glo_share: glo?.network_share === 1 || glo?.network_share === true,
+        airtel_share: airtel?.network_share === 1 || airtel?.network_share === true,
+        mobile_share: mobile?.network_share === 1 || mobile?.network_share === true,
+        mtn_cash: mtn?.cash === 1 || mtn?.cash === true,
+        glo_cash: glo?.cash === 1 || glo?.cash === true,
+        airtel_cash: airtel?.cash === 1 || airtel?.cash === true,
+        mobile_cash: mobile?.cash === 1 || mobile?.cash === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [discount,glo]); 
+  }, [discount]); 
   const onSubmit = async (data) => {
     try {
       await axios.post(`/api/edit/airtime/lock/account/${AccessToken}/adex/secure`,data)

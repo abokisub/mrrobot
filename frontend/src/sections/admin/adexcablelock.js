@@ -26,14 +26,6 @@ export default function AdexCableLock({ discount}) {
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  const defaultValues = useMemo(
-    () => ({
-        gotv: discount?.gotv,
-        startime: discount?.startime,
-        dstv: discount?.dstv
-    }),
-    [discount]
-  );
   const {
     reset,
     setError,
@@ -42,10 +34,13 @@ export default function AdexCableLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      reset(defaultValues);
+    if (discount && discount !== undefined) {
+      reset({
+        gotv: discount?.gotv === 1 || discount?.gotv === true,
+        startime: discount?.startime === 1 || discount?.startime === true,
+        dstv: discount?.dstv === 1 || discount?.dstv === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discount]); 
   const onSubmit = async (data) => {

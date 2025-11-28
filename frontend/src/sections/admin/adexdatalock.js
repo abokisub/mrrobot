@@ -20,36 +20,13 @@ AdexDataLock.propTypes = {
 export default function AdexDataLock({ discount}) {
     const isMountedRef = useIsMountedRef();
   const NewUserSchema = Yup.object().shape({ });
-  const [mtn, setMtn] = useState('');
-  const [glo, setGlo] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [airtel, setAirtel] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const AccessToken =  window.localStorage.getItem('accessToken');
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const defaultValues = useMemo(
-    () => ({
-      mtn_sme: mtn?.network_sme,
-      glo_sme: glo?.network_sme,
-      airtel_sme: airtel?.network_sme,
-      mobile_sme: mobile?.network_sme,
-    //   cg
-    mtn_cg: mtn?.network_cg,
-    glo_cg: glo?.network_cg,
-    airtel_cg: airtel?.network_cg,
-    mobile_cg: mobile?.network_cg,
-
-    // gifting
-    mtn_g: mtn?.network_g,
-    glo_g: glo?.network_g,
-    airtel_g: airtel?.network_g,
-    mobile_g: mobile?.network_g,
-    })
-  );
+  
   const {
     reset,
     setError,
@@ -58,16 +35,31 @@ export default function AdexDataLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      setMtn(discount[0]);
-      setGlo(discount[1]);
-      setAirtel(discount[2]);
-      setMobile(discount[3]);
-      reset(defaultValues);
+    if (discount && Array.isArray(discount) && discount.length >= 4) {
+      // Find networks by name (case-insensitive)
+      const mtn = discount.find(n => n.network && n.network.toUpperCase() === 'MTN');
+      const glo = discount.find(n => n.network && n.network.toUpperCase() === 'GLO');
+      const airtel = discount.find(n => n.network && n.network.toUpperCase() === 'AIRTEL');
+      const mobile = discount.find(n => n.network && (n.network.toUpperCase() === '9MOBILE' || n.network.toUpperCase() === 'MOBILE'));
+      
+      // Reset form with actual values from database
+      reset({
+        mtn_sme: mtn?.network_sme === 1 || mtn?.network_sme === true,
+        glo_sme: glo?.network_sme === 1 || glo?.network_sme === true,
+        airtel_sme: airtel?.network_sme === 1 || airtel?.network_sme === true,
+        mobile_sme: mobile?.network_sme === 1 || mobile?.network_sme === true,
+        mtn_cg: mtn?.network_cg === 1 || mtn?.network_cg === true,
+        glo_cg: glo?.network_cg === 1 || glo?.network_cg === true,
+        airtel_cg: airtel?.network_cg === 1 || airtel?.network_cg === true,
+        mobile_cg: mobile?.network_cg === 1 || mobile?.network_cg === true,
+        mtn_g: mtn?.network_g === 1 || mtn?.network_g === true,
+        glo_g: glo?.network_g === 1 || glo?.network_g === true,
+        airtel_g: airtel?.network_g === 1 || airtel?.network_g === true,
+        mobile_g: mobile?.network_g === 1 || mobile?.network_g === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [discount,glo]); 
+  }, [discount]); 
   const onSubmit = async (data) => {
     try {
       await axios.post(`/api/edit/data/lock/account/${AccessToken}/adex/secure`,data)

@@ -26,14 +26,6 @@ export default function AdexResultLock({ discount}) {
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  const defaultValues = useMemo(
-    () => ({
-        waec: discount?.waec,
-        nabteb: discount?.nabteb,
-        neco: discount?.neco
-    }),
-    [discount]
-  );
   const {
     reset,
     setError,
@@ -42,10 +34,13 @@ export default function AdexResultLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      reset(defaultValues);
+    if (discount && discount !== undefined) {
+      reset({
+        waec: discount?.waec === 1 || discount?.waec === true,
+        nabteb: discount?.nabteb === 1 || discount?.nabteb === true,
+        neco: discount?.neco === 1 || discount?.neco === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discount]); 
   const onSubmit = async (data) => {

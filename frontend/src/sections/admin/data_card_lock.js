@@ -20,25 +20,13 @@ TheDataCardLock.propTypes = {
 export default function TheDataCardLock({ discount}) {
     const isMountedRef = useIsMountedRef();
   const NewUserSchema = Yup.object().shape({ });
-  const [mtn, setMtn] = useState('');
-  const [glo, setGlo] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [airtel, setAirtel] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const AccessToken =  window.localStorage.getItem('accessToken');
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const defaultValues = useMemo(
-    () => ({
-      mtn: mtn?.data_card,
-      glo: glo?.data_card,
-      airtel: airtel?.data_card,
-      mobile: mobile?.data_card,
-    })
-  );
+  
   const {
     reset,
     setError,
@@ -47,16 +35,23 @@ export default function TheDataCardLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      setMtn(discount[0]);
-      setGlo(discount[1]);
-      setAirtel(discount[2]);
-      setMobile(discount[3]);
-      reset(defaultValues);
+    if (discount && Array.isArray(discount) && discount.length >= 4) {
+      // Find networks by name (case-insensitive)
+      const mtn = discount.find(n => n.network && n.network.toUpperCase() === 'MTN');
+      const glo = discount.find(n => n.network && n.network.toUpperCase() === 'GLO');
+      const airtel = discount.find(n => n.network && n.network.toUpperCase() === 'AIRTEL');
+      const mobile = discount.find(n => n.network && (n.network.toUpperCase() === '9MOBILE' || n.network.toUpperCase() === 'MOBILE'));
+      
+      // Reset form with actual values from database
+      reset({
+        mtn: mtn?.data_card === 1 || mtn?.data_card === true,
+        glo: glo?.data_card === 1 || glo?.data_card === true,
+        airtel: airtel?.data_card === 1 || airtel?.data_card === true,
+        mobile: mobile?.data_card === 1 || mobile?.data_card === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [discount,glo]); 
+  }, [discount]); 
   const onSubmit = async (data) => {
     try {
       await axios.post(`/api/data_card_lock/${AccessToken}/secure`,data)

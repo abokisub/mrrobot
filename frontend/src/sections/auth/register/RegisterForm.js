@@ -203,54 +203,79 @@ export default function RegisterForm() {
   }, [passwordValue, confirmPasswordValue]);
 
   const handleNext = async () => {
-    let isValid = false;
     let fieldsToValidate = [];
+    let errorMessage = '';
     
     if (activeStep === 0) {
       fieldsToValidate = ['firstName', 'lastName', 'username', 'gender'];
-      isValid = await trigger(fieldsToValidate);
+      errorMessage = 'Please fill in all personal information fields (First name, Last name, Username, and Gender)';
     } else if (activeStep === 1) {
       fieldsToValidate = ['state', 'city', 'streetAddress'];
-      isValid = await trigger(fieldsToValidate);
+      errorMessage = 'Please fill in all address fields (State, City, and Street address)';
     } else if (activeStep === 2) {
       fieldsToValidate = ['phone', 'password', 'confirmPassword', 'email', 'pin'];
-      isValid = await trigger(fieldsToValidate);
+      errorMessage = 'Please fill in all contact and password fields (Phone, Password, Confirm password, Email, and Transaction PIN)';
     }
+
+    // Trigger validation for all fields in current step
+    const isValid = await trigger(fieldsToValidate);
 
     // Only proceed if all fields are valid
     if (isValid) {
       // Double-check that all required fields have values
       const values = methods.getValues();
       let allFieldsFilled = true;
+      let missingFields = [];
       
       if (activeStep === 0) {
-        allFieldsFilled = 
-          values.firstName?.trim() !== '' &&
-          values.lastName?.trim() !== '' &&
-          values.username?.trim() !== '' &&
-          values.gender !== '';
+        if (!values.firstName?.trim()) missingFields.push('First name');
+        if (!values.lastName?.trim()) missingFields.push('Last name');
+        if (!values.username?.trim()) missingFields.push('Username');
+        if (!values.gender) missingFields.push('Gender');
+        allFieldsFilled = missingFields.length === 0;
       } else if (activeStep === 1) {
-        allFieldsFilled = 
-          values.state?.trim() !== '' &&
-          values.city?.trim() !== '' &&
-          values.streetAddress?.trim() !== '';
+        if (!values.state?.trim()) missingFields.push('State');
+        if (!values.city?.trim()) missingFields.push('City');
+        if (!values.streetAddress?.trim()) missingFields.push('Street address');
+        allFieldsFilled = missingFields.length === 0;
       } else if (activeStep === 2) {
-        allFieldsFilled = 
-          values.phone?.trim() !== '' &&
-          values.password?.trim() !== '' &&
-          values.confirmPassword?.trim() !== '' &&
-          values.email?.trim() !== '' &&
-          values.pin?.trim() !== '' &&
-          values.password === values.confirmPassword;
+        if (!values.phone?.trim()) missingFields.push('Phone number');
+        if (!values.password?.trim()) missingFields.push('Password');
+        if (!values.confirmPassword?.trim()) missingFields.push('Confirm password');
+        if (!values.email?.trim()) missingFields.push('Email');
+        if (!values.pin?.trim()) missingFields.push('Transaction PIN');
+        if (values.password !== values.confirmPassword && values.password && values.confirmPassword) {
+          missingFields.push('Passwords do not match');
+        }
+        allFieldsFilled = missingFields.length === 0;
       }
       
       if (allFieldsFilled && isValid) {
         setActiveStep((prev) => prev + 1);
+      } else {
+        // Show specific error message
+        const specificError = missingFields.length > 0 
+          ? `Please fill in: ${missingFields.join(', ')}`
+          : errorMessage;
+        setError('stepValidation', { 
+          type: 'manual', 
+          message: specificError 
+        });
       }
+    } else {
+      // Get first error message from validation
+      const firstError = fieldsToValidate.find(field => errors[field]);
+      const errorMsg = firstError ? errors[firstError]?.message : errorMessage;
+      setError('stepValidation', { 
+        type: 'manual', 
+        message: errorMsg || errorMessage
+      });
     }
   };
 
   const handleBack = () => {
+    // Clear step validation error when going back
+    methods.clearErrors('stepValidation');
     setActiveStep((prev) => prev - 1);
   };
 
@@ -491,6 +516,13 @@ export default function RegisterForm() {
         {/* Step Content */}
         {renderStepContent()}
 
+        {/* Validation Error Message - Right after form fields */}
+        {errors.stepValidation && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {errors.stepValidation.message}
+          </Alert>
+        )}
+
         {/* Navigation Buttons */}
         <Stack direction="row" spacing={2} justifyContent="space-between">
           {activeStep > 0 ? (
@@ -528,13 +560,6 @@ export default function RegisterForm() {
             </LoadingButton>
           )}
         </Stack>
-
-        {/* Validation Error Message */}
-        {Object.keys(errors).length > 0 && activeStep < 3 && (
-          <Alert severity="error" sx={{ borderRadius: 2, mt: 1 }}>
-            Please fill in all required fields before proceeding.
-          </Alert>
-        )}
 
         {/* Login Link */}
         <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>

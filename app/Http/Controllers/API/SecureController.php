@@ -16,8 +16,28 @@ class  SecureController extends Controller
         $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
         $origin = $request->headers->get('origin');
         $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
         
-        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -133,10 +153,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DataLock(Request $request)
@@ -282,16 +298,35 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function CableLock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -348,16 +383,35 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function ResultLock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -414,16 +468,35 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function OtherLock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -559,10 +632,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DataPlanDelete(Request $request)
@@ -610,10 +679,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function AddDataPlan(Request $request)
@@ -759,10 +824,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function RDataPlan(Request $request)
@@ -820,10 +881,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditDataPlan(Request $request)
@@ -958,10 +1015,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DeleteCablePlan(Request $request)
@@ -1009,10 +1062,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function RCablePlan(Request $request)
@@ -1067,10 +1116,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function AddCablePlan(Request $request)
@@ -1168,10 +1213,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditCablePlan(Request $request)
@@ -1258,10 +1299,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DeleteBillPlan(Request $request)
@@ -1309,10 +1346,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function RBillPlan(Request $request)
@@ -1367,10 +1400,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function CreateBillPlan(Request $request)
@@ -1464,10 +1493,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditBillPlan(Request $request)
@@ -1552,10 +1577,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function RNetwork(Request $request)
@@ -1610,10 +1631,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditeNetwork(Request $request)
@@ -1685,10 +1702,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditAdexApi(Request $request)
@@ -1744,10 +1757,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditMsorgApi(Request $request)
@@ -1798,10 +1807,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditVirusApi(Request $request)
@@ -1852,10 +1857,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditOtherApi(Request $request)
@@ -1911,10 +1912,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditWebUrl(Request $request)
@@ -1975,10 +1972,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function RResult(Request $request)
@@ -2033,10 +2026,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function AddResult(Request $request)
@@ -2127,10 +2116,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DelteResult(Request $request)
@@ -2178,10 +2163,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function EditResult(Request $request)
@@ -2248,10 +2229,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function UserStock(Request $request)
@@ -2289,10 +2266,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function UserEditStock(Request $request)
@@ -2412,10 +2385,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function UserProfile(Request $request)
@@ -2487,10 +2456,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function ResetPasswordUser(Request $request)
@@ -2551,10 +2516,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function ChangePin(Request $request)
@@ -2611,10 +2572,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function CreatePin(Request $request)
@@ -2670,10 +2627,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function UserAccountDetails(Request $request)
@@ -2749,10 +2702,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function UsersAccountDetails(Request $request)
@@ -2797,10 +2746,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function DataPurchased(Request $request)
@@ -2868,10 +2813,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function StockBalance(Request $request)
@@ -2905,10 +2846,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function SOFTWARE(Request $request)
@@ -2926,10 +2863,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function SystemInfo(Request $request)
@@ -3310,10 +3243,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function ChangePPassword(Request $request)
@@ -3351,10 +3280,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
     public function InviteUser(Request $request)
@@ -3408,10 +3333,6 @@ class  SecureController extends Controller
                 'status' => 'fail',
                 'message' => 'Origin not allowed'
             ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
         }
     }
 }

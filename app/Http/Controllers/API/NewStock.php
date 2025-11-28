@@ -114,14 +114,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -227,14 +233,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -317,14 +329,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -357,14 +375,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -396,14 +420,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -438,14 +468,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -479,14 +515,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -583,14 +625,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -681,14 +729,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -720,14 +774,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -755,14 +815,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -855,14 +921,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -890,14 +962,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -967,14 +1045,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1004,14 +1088,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1039,14 +1129,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1074,14 +1170,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1173,14 +1275,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1251,14 +1359,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1268,8 +1382,31 @@ class  NewStock extends Controller
 
     public function DataCardLock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1330,7 +1467,10 @@ class  NewStock extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1339,8 +1479,31 @@ class  NewStock extends Controller
     }
     public function RechargeCardLock(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1401,7 +1564,10 @@ class  NewStock extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1460,14 +1626,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1527,14 +1699,20 @@ class  NewStock extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
+                return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'

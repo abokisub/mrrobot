@@ -12,8 +12,11 @@ class  PlanController extends Controller
 
     public function DataPlan(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {

@@ -24,10 +24,17 @@
     # RewriteCond %{REQUEST_URI} (.+)/$
     # RewriteRule ^ %1 [L,R=301]
 
+    # Exclude service worker and manifest from React Router rewrite
+    RewriteCond %{REQUEST_URI} ^/service-worker\.js$ [OR]
+    RewriteCond %{REQUEST_URI} ^/manifest\.json$
+    RewriteRule ^ - [L]
+
     # Handle React Router - serve index.html for non-API routes
     RewriteCond %{REQUEST_URI} !^/api/
     RewriteCond %{REQUEST_URI} !^/storage/
     RewriteCond %{REQUEST_URI} !^/static/
+    RewriteCond %{REQUEST_URI} !^/service-worker\.js$
+    RewriteCond %{REQUEST_URI} !^/manifest\.json$
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-l

@@ -15,31 +15,11 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        // Check origin using inline logic (helper function may not be loaded)
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
         $origin = $request->headers->get('origin');
-        $adexAppKey = env('ADEX_APP_KEY', '');
-        $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
-
-        if (env('APP_ENV') === 'local') {
-            $allowedOrigins = array_merge($allowedOrigins, [
-                'http://localhost:3000',
-                'http://127.0.0.1:3000',
-                'http://localhost:8080',
-                'http://127.0.0.1:8080',
-                'http://localhost:8000',
-                'http://127.0.0.1:8000'
-            ]);
-        }
-
-        // Check if origin is allowed
-        $originAllowed = false;
-        if (empty($origin) && env('APP_ENV') === 'local') {
-            $originAllowed = true; // Allow in local environment
-        } elseif (in_array(rtrim($origin, '/'), $allowedOrigins)) {
-            $originAllowed = true;
-        }
-
-        if ($originAllowed) {
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:8',
                 'email' => 'required|unique:user,email|max:255|email',
@@ -238,31 +218,11 @@ class AuthController extends Controller
     }
     public function account(Request $request)
     {
-        // Check origin using inline logic (helper function may not be loaded)
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
         $origin = $request->headers->get('origin');
-        $adexAppKey = env('ADEX_APP_KEY', '');
-        $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
-
-        if (env('APP_ENV') === 'local') {
-            $allowedOrigins = array_merge($allowedOrigins, [
-                'http://localhost:3000',
-                'http://127.0.0.1:3000',
-                'http://localhost:8080',
-                'http://127.0.0.1:8080',
-                'http://localhost:8000',
-                'http://127.0.0.1:8000'
-            ]);
-        }
-
-        // Check if origin is allowed
-        $originAllowed = false;
-        if (empty($origin) && env('APP_ENV') === 'local') {
-            $originAllowed = true; // Allow in local environment
-        } elseif (in_array(rtrim($origin, '/'), $allowedOrigins)) {
-            $originAllowed = true;
-        }
-
-        if ($originAllowed) {
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             try {
                 $user_token = $request->id;
                 $real_token = $this->verifytoken($user_token);
@@ -447,8 +407,11 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             //our login function over here
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',

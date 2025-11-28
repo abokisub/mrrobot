@@ -50,6 +50,7 @@ export default function LoginForm() {
   const { login } = useAuth();
   const isMountedRef = useIsMountedRef();
   const [showPassword, setShowPassword] = useState(false);
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().required('Username, Email or Phone Number is required'),
@@ -89,7 +90,9 @@ export default function LoginForm() {
         <RHFTextField
           name="email"
           label="Phone Number"
-          placeholder="Phone Number/ Email"
+          placeholder={isPhoneFocused ? "Phone Number/ Email" : "Phone Number"}
+          onFocus={() => setIsPhoneFocused(true)}
+          onBlur={() => setIsPhoneFocused(false)}
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,

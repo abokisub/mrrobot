@@ -601,7 +601,10 @@ class AppController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('adex.error_500'));
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Origin not allowed'
+            ], 403);
         }
     }
 

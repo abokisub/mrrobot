@@ -89,7 +89,7 @@ export default function LoginForm() {
         {/* Email/Phone Input */}
         <RHFTextField
           name="email"
-          label="Phone Number"
+          label="Phone/Email"
           placeholder={isPhoneFocused ? "Phone Number/ Email" : "Phone Number"}
           onFocus={() => setIsPhoneFocused(true)}
           onBlur={() => setIsPhoneFocused(false)}

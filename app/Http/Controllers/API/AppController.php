@@ -446,25 +446,27 @@ class AppController extends Controller
     }
     public function SystemNetwork(Request $request)
     {
-        $explode_url = explode(',', config('adex.app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $request->header('Authorization')) {
             return response()->json([
                 'status' => 'success',
                 'network' => DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get()
             ]);
         } else {
-            return redirect(config('adex.error_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500', '/500'));
         }
     }
 
     public function checkNetworkType(Request $type)
     {
-        $explode_url = explode(',', config('adex.app_key'));
-        if (in_array($type->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $type->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        
+        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $type->header('Authorization')) {
             if (!empty($type->id)) {
                 if (isset($type->token)) {
                     $network = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();

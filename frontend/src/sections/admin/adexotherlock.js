@@ -26,27 +26,6 @@ export default function AdexOtherLock({ discount}) {
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
   });
-  const defaultValues = useMemo(
-    () => ({
-        monnify_atm: discount?.monnify_atm,
-        monnify: discount?.monnify,
-        referral: discount?.referral,
-        is_verify_email: discount?.is_verify_email,
-        is_feature: discount?.is_feature,
-        wema: discount?.wema,
-        rolex: discount?.rolex,
-        fed: discount?.fed,
-        str: discount?.str,
-        bulksms: discount?.bulksms,
-        allow_pin: discount?.allow_pin,
-        bill: discount?.bill,
-        paystack: discount?.paystack,
-        bank_transfer: discount?.bank_transfer ,
-        allow_limit: discount?.allow_limit,
-        stock: discount?.stock
-    }),
-    [discount]
-  );
   const {
     reset,
     setError,
@@ -55,10 +34,26 @@ export default function AdexOtherLock({ discount}) {
   } = methods;
 
   useEffect(() => {
-    if (discount!== undefined) {
-      reset(defaultValues);
+    if (discount && discount !== undefined) {
+      reset({
+        monnify_atm: discount?.monnify_atm === 1 || discount?.monnify_atm === true,
+        monnify: discount?.monnify === 1 || discount?.monnify === true,
+        referral: discount?.referral === 1 || discount?.referral === true,
+        is_verify_email: discount?.is_verify_email === 1 || discount?.is_verify_email === true,
+        is_feature: discount?.is_feature === 1 || discount?.is_feature === true,
+        wema: discount?.wema === 1 || discount?.wema === true,
+        rolex: discount?.rolex === 1 || discount?.rolex === true,
+        fed: discount?.fed === 1 || discount?.fed === true,
+        str: discount?.str === 1 || discount?.str === true,
+        bulksms: discount?.bulksms === 1 || discount?.bulksms === true,
+        allow_pin: discount?.allow_pin === 1 || discount?.allow_pin === true,
+        bill: discount?.bill === 1 || discount?.bill === true,
+        paystack: discount?.paystack === 1 || discount?.paystack === true,
+        bank_transfer: discount?.bank_transfer === 1 || discount?.bank_transfer === true,
+        allow_limit: discount?.allow_limit === 1 || discount?.allow_limit === true,
+        stock: discount?.stock === 1 || discount?.stock === true,
+      });
     }
-   
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discount]); 
   const onSubmit = async (data) => {

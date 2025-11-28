@@ -204,17 +204,49 @@ export default function RegisterForm() {
 
   const handleNext = async () => {
     let isValid = false;
+    let fieldsToValidate = [];
     
     if (activeStep === 0) {
-      isValid = await trigger(['firstName', 'lastName', 'username', 'gender']);
+      fieldsToValidate = ['firstName', 'lastName', 'username', 'gender'];
+      isValid = await trigger(fieldsToValidate);
     } else if (activeStep === 1) {
-      isValid = await trigger(['state', 'city', 'streetAddress']);
+      fieldsToValidate = ['state', 'city', 'streetAddress'];
+      isValid = await trigger(fieldsToValidate);
     } else if (activeStep === 2) {
-      isValid = await trigger(['phone', 'password', 'confirmPassword', 'email', 'pin']);
+      fieldsToValidate = ['phone', 'password', 'confirmPassword', 'email', 'pin'];
+      isValid = await trigger(fieldsToValidate);
     }
 
+    // Only proceed if all fields are valid
     if (isValid) {
-      setActiveStep((prev) => prev + 1);
+      // Double-check that all required fields have values
+      const values = methods.getValues();
+      let allFieldsFilled = true;
+      
+      if (activeStep === 0) {
+        allFieldsFilled = 
+          values.firstName?.trim() !== '' &&
+          values.lastName?.trim() !== '' &&
+          values.username?.trim() !== '' &&
+          values.gender !== '';
+      } else if (activeStep === 1) {
+        allFieldsFilled = 
+          values.state?.trim() !== '' &&
+          values.city?.trim() !== '' &&
+          values.streetAddress?.trim() !== '';
+      } else if (activeStep === 2) {
+        allFieldsFilled = 
+          values.phone?.trim() !== '' &&
+          values.password?.trim() !== '' &&
+          values.confirmPassword?.trim() !== '' &&
+          values.email?.trim() !== '' &&
+          values.pin?.trim() !== '' &&
+          values.password === values.confirmPassword;
+      }
+      
+      if (allFieldsFilled && isValid) {
+        setActiveStep((prev) => prev + 1);
+      }
     }
   };
 
@@ -496,6 +528,13 @@ export default function RegisterForm() {
             </LoadingButton>
           )}
         </Stack>
+
+        {/* Validation Error Message */}
+        {Object.keys(errors).length > 0 && activeStep < 3 && (
+          <Alert severity="error" sx={{ borderRadius: 2, mt: 1 }}>
+            Please fill in all required fields before proceeding.
+          </Alert>
+        )}
 
         {/* Login Link */}
         <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>

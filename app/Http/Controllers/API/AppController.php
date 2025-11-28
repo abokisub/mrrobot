@@ -526,8 +526,28 @@ class AppController extends Controller
         $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
         $origin = $type->headers->get('origin');
         $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $type->headers->get('referer');
+        $host = $type->getHost();
+        $scheme = $type->getScheme();
+        $fullUrl = $scheme . '://' . $host;
         
-        if (in_array($originNormalized, $allowedOrigins) || config('adex.device_key') === $type->header('Authorization')) {
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $type->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (!empty($type->id)) {
                 if (isset($type->token)) {
                     $network = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();

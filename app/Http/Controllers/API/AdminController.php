@@ -1613,73 +1613,80 @@ class  AdminController extends Controller
     }
     public function Discount(Request $request)
     {
-        if ($this->validateOrigin($request)) {
-            if (!empty($request->id)) {
-                $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
-                    $query->where('type', 'ADMIN');
-                });
-                $database_name = null;
-                if ($check_user->count() == 1) {
-                    if (isset($request->database_name)) {
-                        $database_name = $request->database_name;
-                        $search = strtolower($request->search);
-                    }
+        try {
+            if ($this->validateOrigin($request)) {
+                if (!empty($request->id)) {
+                    $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
+                        $query->where('type', 'ADMIN');
+                    });
+                    $database_name = null;
+                    if ($check_user->count() == 1) {
+                        if (isset($request->database_name)) {
+                            $database_name = $request->database_name;
+                            $search = strtolower($request->search);
+                        }
 
-                    if ($database_name == 'wallet_funding') {
-                        if (!empty($search)) {
-                            return response()->json([
-                                'all_stock' => DB::table('wallet_funding')->where(function ($query) use ($search) {
-                                    $query->orWhere('username', 'LIKE', "%$search%");
-                                })->orderBy('id', 'desc')->paginate($request->adex)
-                            ]);
+                        if ($database_name == 'wallet_funding') {
+                            if (!empty($search)) {
+                                return response()->json([
+                                    'all_stock' => DB::table('wallet_funding')->where(function ($query) use ($search) {
+                                        $query->orWhere('username', 'LIKE', "%$search%");
+                                    })->orderBy('id', 'desc')->paginate($request->adex)
+                                ]);
+                            } else {
+                                return response()->json([
+                                    'all_stock' => DB::table('wallet_funding')->orderBy('id', 'desc')->paginate($request->adex)
+                                ]);
+                            }
                         } else {
                             return response()->json([
-                                'all_stock' => DB::table('wallet_funding')->orderBy('id', 'desc')->paginate($request->adex)
+                                'airtime_discount' => DB::table('airtime_discount')->first(),
+                                'cable_charges' => DB::table('cable_charge')->first(),
+                                'bill_charges' => DB::table('bill_charge')->first(),
+                                'cash_discount' => DB::table('cash_discount')->first(),
+                                'result_charges' => DB::table('result_charge')->first(),
+                                'all_network' => DB::table('network')->get(),
+                                'cable_result_lock' => DB::table('cable_result_lock')->first(),
+
+                                'adex_api'  => DB::table('adex_api')->first(),
+                                'msorg_api' => DB::table('msorg_api')->first(),
+                                'virus_api' => DB::table('virus_api')->first(),
+                                'other_api' => DB::table('other_api')->first(),
+                                'web_api' => DB::table('web_api')->first(),
+                                'airtime_sel' => DB::table('airtime_sel')->first(),
+                                'bill_sel' => DB::table('bill_sel')->first(),
+                                'cable_sel' => DB::table('cable_sel')->first(),
+                                'bulksms_sel' => DB::table('bulksms_sel')->first(),
+                                'exam_sel' => DB::table('exam_sel')->first(),
                             ]);
                         }
                     } else {
                         return response()->json([
-                            'airtime_discount' => DB::table('airtime_discount')->first(),
-                            'cable_charges' => DB::table('cable_charge')->first(),
-                            'bill_charges' => DB::table('bill_charge')->first(),
-                            'cash_discount' => DB::table('cash_discount')->first(),
-                            'result_charges' => DB::table('result_charge')->first(),
-                            'all_network' => DB::table('network')->get(),
-                            'cable_result_lock' => DB::table('cable_result_lock')->first(),
-
-                            'adex_api'  => DB::table('adex_api')->first(),
-                            'msorg_api' => DB::table('msorg_api')->first(),
-                            'virus_api' => DB::table('virus_api')->first(),
-                            'other_api' => DB::table('other_api')->first(),
-                            'web_api' => DB::table('web_api')->first(),
-                            'airtime_sel' => DB::table('airtime_sel')->first(),
-                            'bill_sel' => DB::table('bill_sel')->first(),
-                            'cable_sel' => DB::table('cable_sel')->first(),
-                            'bulksms_sel' => DB::table('bulksms_sel')->first(),
-                            'exam_sel' => DB::table('exam_sel')->first(),
-                        ]);
+                            'status' => 403,
+                            'message' => 'Not Authorised'
+                        ])->setStatusCode(403);
                     }
                 } else {
                     return response()->json([
-                        'status' => 403,
-                        'message' => 'Not Authorised'
-                    ])->setStatusCode(403);
+                        'status' => 'fail',
+                        'message' => 'User ID required'
+                    ], 403);
                 }
             } else {
                 return response()->json([
                     'status' => 'fail',
-                    'message' => 'User ID required'
+                    'message' => 'Origin not allowed'
                 ], 403);
             }
-        } else {
+        } catch (\Exception $e) {
+            \Log::error('Discount method error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_id' => $request->id ?? 'none'
+            ]);
             return response()->json([
                 'status' => 'fail',
-                'message' => 'Origin not allowed'
-            ], 403);
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+                'message' => 'An error occurred while fetching data'
+            ], 500);
         }
     }
     public function AirtimeDiscount(Request $request)

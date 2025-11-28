@@ -12,42 +12,8 @@ class AppController extends Controller
 {
     public function system(Request $request)
     {
-        // Check origin using inline logic (helper function may not be loaded)
-        $origin = $request->headers->get('origin');
-        $adexAppKey = env('ADEX_APP_KEY', '');
-        $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
-        
-        // Normalize origins (remove trailing slashes and convert to lowercase for comparison)
-        $normalizedAllowedOrigins = array_map(function($url) {
-            return strtolower(rtrim($url, '/'));
-        }, $allowedOrigins);
-        
-        if (env('APP_ENV') === 'local') {
-            $localhostOrigins = [
-                'http://localhost:3000',
-                'http://127.0.0.1:3000',
-                'http://localhost:8080',
-                'http://127.0.0.1:8080',
-                'http://localhost:8000',
-                'http://127.0.0.1:8000'
-            ];
-            $normalizedAllowedOrigins = array_merge($normalizedAllowedOrigins, array_map(function($url) {
-                return strtolower(rtrim($url, '/'));
-            }, $localhostOrigins));
-        }
-        
-        // Check if origin is allowed
-        $originAllowed = false;
-        if (empty($origin) && env('APP_ENV') === 'local') {
-            $originAllowed = true; // Allow in local environment
-        } elseif ($origin) {
-            $normalizedOrigin = strtolower(rtrim($origin, '/'));
-            if (in_array($normalizedOrigin, $normalizedAllowedOrigins)) {
-                $originAllowed = true;
-            }
-        }
-        
-        if ($originAllowed) {
+        $explode_url = explode(',', config('adex.app_key'));
+        if (in_array($request->headers->get('origin'), $explode_url)) {
             try {
                 return response()->json([
                     'status' => 'success',
@@ -66,16 +32,13 @@ class AppController extends Controller
                 ])->setStatusCode(500);
             }
         } else {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
 
     public function apiUpgrade(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             $validator = validator::make($request->all(), [
                 'username' => 'required|max:25',
@@ -118,7 +81,7 @@ class AppController extends Controller
                                 'website' => $request->url,
                                 'date' => $date,
                                 'transid' => $ref,
-                                'app_phone' =>  $general->app_phone
+                                'app_phone' => $general->app_phone
                             ];
                             MailController::send_mail($email_data, 'email.apirequest');
                         }
@@ -156,11 +119,7 @@ class AppController extends Controller
                 }
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
 
@@ -168,7 +127,7 @@ class AppController extends Controller
 
     public function buildWebsite(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             $validator = validator::make($request->all(), [
                 'username' => 'required|max:25',
@@ -239,7 +198,7 @@ class AppController extends Controller
                                                     'website' => $request->url,
                                                     'date' => $date,
                                                     'transid' => $ref,
-                                                    'app_phone' =>  $general->app_phone
+                                                    'app_phone' => $general->app_phone
                                                 ];
                                                 MailController::send_mail($email_data, 'email.affliate_request');
                                             }
@@ -307,16 +266,12 @@ class AppController extends Controller
                 }
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function AwufPackage(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!isset($request->id)) {
                 return response()->json([
@@ -397,11 +352,7 @@ class AppController extends Controller
                 }
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
 
@@ -409,7 +360,7 @@ class AppController extends Controller
 
     public function AgentPackage(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!isset($request->id)) {
                 return response()->json([
@@ -490,23 +441,19 @@ class AppController extends Controller
                 }
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function SystemNetwork(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             return response()->json([
                 'status' => 'success',
-                'network' =>  DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get()
+                'network' => DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get()
             ]);
         } else {
-            return redirect(env('ERROR_500'));
+            return redirect(config('adex.error_500'));
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -516,11 +463,11 @@ class AppController extends Controller
 
     public function checkNetworkType(Request $type)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($type->headers->get('origin'), $explode_url)) {
             if (!empty($type->id)) {
                 if (isset($type->token)) {
-                    $network =  DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();
+                    $network = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();
                     $user = DB::table('user')->where(['id' => $this->verifytoken($type->token), 'status' => 1]);
                     if ($user->count() == 1) {
                         $adex = $user->first();
@@ -554,11 +501,11 @@ class AppController extends Controller
                     } else {
                         return response()->json([
                             'status' => 403,
-                            'message'  => 'Reload Your Browser'
+                            'message' => 'Reload Your Browser'
                         ])->setStatusCode(403);
                     }
                 } else {
-                    $network =  DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();
+                    $network = DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id')->where('plan_id', $type->id)->first();
                     return response()->json([
                         'status' => 'success',
                         'network' => $network,
@@ -571,17 +518,13 @@ class AppController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
 
     public function DeleteUser(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
@@ -591,9 +534,9 @@ class AppController extends Controller
                     if (isset($request->username)) {
                         for ($i = 0; $i < count($request->username); $i++) {
                             $username = $request->username[$i];
-                            $delete_user = DB::table('user')->where('username',  $username);
+                            $delete_user = DB::table('user')->where('username', $username);
                             if ($delete_user->count() > 0) {
-                                $delete = DB::table('user')->where('username',  $username)->delete();
+                                $delete = DB::table('user')->where('username', $username)->delete();
                                 DB::table('wallet_funding')->where('username', $username)->delete();
                             } else {
                                 $delete = false;
@@ -623,23 +566,15 @@ class AppController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                return redirect(config('adex.error_500'));
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function singleDelete(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
@@ -680,23 +615,15 @@ class AppController extends Controller
                     ])->setStatusCode(403);
                 }
             } else {
-                return redirect(env('ERROR_500'));
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'Unable to Authenticate System'
-                ])->setStatusCode(403);
+                return redirect(config('adex.error_500'));
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function UserNotif(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
 
@@ -712,12 +639,12 @@ class AppController extends Controller
                             if ($select_user->count() > 0) {
                                 $users = $select_user->first();
                                 if ($users->profile_image !== null) {
-                                    $profile_image[] = ['username' => $adex->username,   'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $users->profile_image, 'status' => $adex->adex];
+                                    $profile_image[] = ['username' => $adex->username, 'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $users->profile_image, 'status' => $adex->adex];
                                 } else {
-                                    $profile_image[] = ['username' => $adex->username,   'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $users->username, 'status' => $adex->adex];
+                                    $profile_image[] = ['username' => $adex->username, 'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $users->username, 'status' => $adex->adex];
                                 }
                             } else {
-                                $profile_image[] = ['username' => $adex->username,   'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $adex->username, 'status' => $adex->adex];
+                                $profile_image[] = ['username' => $adex->username, 'id' => $adex->id, 'message' => $adex->message, 'date' => $adex->date, 'profile_image' => $adex->username, 'status' => $adex->adex];
                             }
                         }
                         return response()->json([
@@ -738,16 +665,12 @@ class AppController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function ClearNotifUser(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
 
@@ -770,33 +693,25 @@ class AppController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
 
     public function CableName(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             return response()->json([
                 'status' => 'success',
                 'cable' => DB::table('cable_result_lock')->first()
             ]);
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function BillCal(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if ((isset($request->id)) && (!empty($request->id))) {
                 if (is_numeric($request->id)) {
@@ -818,11 +733,7 @@ class AppController extends Controller
                 }
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function DiscoList()
@@ -840,7 +751,7 @@ class AppController extends Controller
     }
     public function AirtimeCash(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         if (in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->amount)) {
                 if (!empty($request->network)) {
@@ -866,35 +777,31 @@ class AppController extends Controller
                 return response()->json([])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
-            return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System'
-            ])->setStatusCode(403);
+            return redirect(config('adex.error_500'));
         }
     }
     public function BulksmsCal(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         $origin = $request->headers->get('origin');
         if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'amount' => $this->core()->bulk_sms
             ]);
         } else {
-            return redirect(env('ERROR_500'));
+            return redirect(config('adex.error_500'));
         }
     }
     public function ResultPrice(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
+        $explode_url = explode(',', config('adex.app_key'));
         $origin = $request->headers->get('origin');
         if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'price' => DB::table('result_charge')->first()
             ]);
         } else {
-            return redirect(env('ERROR_500'));
+            return redirect(config('adex.error_500'));
         }
     }
 }

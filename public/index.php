@@ -7,57 +7,88 @@ define('LARAVEL_START', microtime(true));
 
 /*
 |--------------------------------------------------------------------------
-| Auto-detect Laravel base path for cPanel compatibility
+| ZERO-DEPLOYMENT SYSTEM (Universal index.php)
 |--------------------------------------------------------------------------
-*/
-
-/*
-|--------------------------------------------------------------------------
-| Auto-detect Laravel base path for both deployment patterns:
-| 1. Standard: Laravel core outside web root (public_html -> ../laravel)
-| 2. Simple: Everything in public_html (Laravel root = parent of public)
-|--------------------------------------------------------------------------
+| This file automatically detects the Laravel base path for ANY deployment:
+| - Localhost (XAMPP/Laragon)
+| - cPanel (public_html -> ../laravel)
+| - Subdomains
+| - Nested folders
+|
+| NO MANUAL EDITING REQUIRED.
 */
 
 $laravelBasePath = null;
 
-// Try standard structure first (parent directory)
-$standardPath = realpath(__DIR__ . '/..');
-if ($standardPath && file_exists($standardPath . '/vendor/autoload.php') && file_exists($standardPath . '/bootstrap/app.php')) {
-    $laravelBasePath = $standardPath;
+// 1. Check for manual override in Environment
+if (isset($_ENV['APP_BASE_PATH']) && !empty($_ENV['APP_BASE_PATH'])) {
+    $testPath = realpath($_ENV['APP_BASE_PATH']);
+    if ($testPath && file_exists($testPath . '/vendor/autoload.php')) {
+        $laravelBasePath = $testPath;
+    }
 }
 
-// If not found, try cPanel pattern (laravel folder)
+// 2. Auto-detect by searching upwards (up to 5 levels)
 if (!$laravelBasePath) {
-    $cpanelPaths = [
-        __DIR__ . '/../laravel/',
-        __DIR__ . '/../../laravel/',
-        dirname(dirname(__DIR__)) . '/laravel/',
-    ];
-    
-    foreach ($cpanelPaths as $path) {
-        $realPath = realpath($path);
-        if ($realPath && file_exists($realPath . '/vendor/autoload.php') && file_exists($realPath . '/bootstrap/app.php')) {
-            $laravelBasePath = $realPath;
+    $currentDir = __DIR__;
+    for ($i = 1; $i <= 5; $i++) {
+        $testPath = realpath($currentDir . str_repeat('/..', $i));
+
+        // Check for key Laravel files to confirm this is the root
+        if (
+            $testPath &&
+            file_exists($testPath . '/vendor/autoload.php') &&
+            file_exists($testPath . '/bootstrap/app.php') &&
+            file_exists($testPath . '/artisan')
+        ) {
+
+            $laravelBasePath = $testPath;
             break;
         }
     }
 }
 
-// Final fallback: use parent directory (simple deployment)
+// 3. Fallback: Check specific cPanel patterns if auto-detect failed
 if (!$laravelBasePath) {
-    $laravelBasePath = dirname(__DIR__);
+    $cpanelPaths = [
+        realpath(__DIR__ . '/../laravel'), // Standard cPanel
+        realpath(__DIR__ . '/../../laravel'), // Nested public
+        realpath($_SERVER['DOCUMENT_ROOT'] . '/../laravel'), // Root relative
+    ];
+
+    foreach ($cpanelPaths as $path) {
+        if ($path && file_exists($path . '/vendor/autoload.php')) {
+            $laravelBasePath = $path;
+            break;
+        }
+    }
+}
+
+// 4. Final Safety Check
+if (!$laravelBasePath || !file_exists($laravelBasePath . '/vendor/autoload.php')) {
+    // Friendly Error Message
+    header('HTTP/1.1 503 Service Unavailable');
+    die("
+        <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
+            <h1>Deployment Error</h1>
+            <p>Could not locate the Laravel application files.</p>
+            <p>Please ensure the <code>vendor</code> folder exists and is uploaded.</p>
+            <hr>
+            <small>Zero-Deployment System v1.0</small>
+        </div>
+    ");
+}
+
+// Set the detected path for Laravel
+if (!isset($_ENV['APP_BASE_PATH'])) {
+    $_ENV['APP_BASE_PATH'] = $laravelBasePath;
+    putenv('APP_BASE_PATH=' . $laravelBasePath);
 }
 
 /*
 |--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance
 |--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
 */
 
 if (file_exists($maintenance = $laravelBasePath . '/storage/framework/maintenance.php')) {
@@ -68,11 +99,6 @@ if (file_exists($maintenance = $laravelBasePath . '/storage/framework/maintenanc
 |--------------------------------------------------------------------------
 | Register The Auto Loader
 |--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
 */
 
 require $laravelBasePath . '/vendor/autoload.php';
@@ -81,11 +107,6 @@ require $laravelBasePath . '/vendor/autoload.php';
 |--------------------------------------------------------------------------
 | Run The Application
 |--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
 */
 
 $app = require_once $laravelBasePath . '/bootstrap/app.php';

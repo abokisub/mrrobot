@@ -16,14 +16,24 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
-Route::get('/', function () {
+// Specific routes first (before catch-all)
+Route::any('vdf_auto_fund_adex', [PaymentController::class, 'VDFWEBHOOK']);
+Route::get('/cache', function () {
+    return Cache::flush();
+});
 
+// Serve React SPA - all non-API routes should serve index.html
+Route::get('/', function () {
+    $indexPath = public_path('index.html');
+    if (file_exists($indexPath)) {
+        return response()->file($indexPath);
+    }
+    // Fallback to old view if React build not found
     $general = DB::table('general')->first();
     $mtn = DB::table('data_plan')
         ->where(['network' => 'MTN', 'plan_status' => 1])
         ->orderBy('id', 'asc')
         ->get();
-
     $glo = DB::table('data_plan')
         ->where(['network' => 'GLO', 'plan_status' => 1])
         ->get();
@@ -33,7 +43,6 @@ Route::get('/', function () {
     $airtel = DB::table('data_plan')
         ->where(['network' => 'AIRTEL', 'plan_status' => 1])
         ->get();
-
     return view('index', [
         'general' => $general,
         'mtn' => $mtn,
@@ -42,9 +51,17 @@ Route::get('/', function () {
         'mobile' => $mobile
     ]);
 });
-Route::any('vdf_auto_fund_adex', [PaymentController::class, 'VDFWEBHOOK']);
 
-Route::get('/cache', function () {
-    return
-        Cache::flush();
-});
+// Catch-all route for React Router - MUST be last
+Route::get('/{any}', function ($any) {
+    // Skip API routes and static files (these are handled by .htaccess and api.php)
+    if (strpos($any, 'api/') === 0 || strpos($any, 'storage/') === 0 || strpos($any, 'static/') === 0) {
+        abort(404);
+    }
+    
+    $indexPath = public_path('index.html');
+    if (file_exists($indexPath)) {
+        return response()->file($indexPath);
+    }
+    abort(404);
+})->where('any', '.*');

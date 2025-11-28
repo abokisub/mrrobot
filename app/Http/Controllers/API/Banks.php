@@ -14,16 +14,10 @@ class  Banks extends Controller
 {
  public function GetBanksArray(Request $request)
 {
-       $allowedOrigins = array_filter(array_map('trim', explode(',', env('ADEX_APP_KEY', ''))));
-       $origin = rtrim($request->header('Origin', ''), '/');
+       $allowedOrigins = explode(',', config('adex.app_key'));
+       $origin = $request->header('Origin');
        $authorization = $request->header('Authorization');
-       
-       // Normalize origins for comparison (remove trailing slashes)
-       $normalizedOrigins = array_map(function($url) {
-           return rtrim($url, '/');
-       }, $allowedOrigins);
-       
-       if (in_array($origin, $normalizedOrigins) || env('ADEX_DEVICE_KEY') === $authorization) {
+       if (in_array($origin, $allowedOrigins) || config('adex.device_key') === $authorization) {
         if (!empty($request->id)) {
            $auth_user = DB::table('user')->where('status', 1)->where(function($query) use ($request) {
            $query->orWhere('id', $this->verifytoken($request->id))
@@ -55,7 +49,7 @@ class  Banks extends Controller
                     'charges' => $monnify_charge . ' NAIRA',
                 ];
             }
-            if (!is_null($auth_user->paystack_account)) {
+            if (isset($auth_user->paystack_account) && !is_null($auth_user->paystack_account)) {
                 $banks_array[] = [
                     "name" => "PAYSTACK",
                     "account" => $auth_user->paystack_account,

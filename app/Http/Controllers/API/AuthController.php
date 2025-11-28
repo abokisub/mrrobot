@@ -19,7 +19,7 @@ class AuthController extends Controller
         $origin = $request->headers->get('origin');
         $adexAppKey = env('ADEX_APP_KEY', '');
         $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
-        
+
         if (env('APP_ENV') === 'local') {
             $allowedOrigins = array_merge($allowedOrigins, [
                 'http://localhost:3000',
@@ -30,7 +30,7 @@ class AuthController extends Controller
                 'http://127.0.0.1:8000'
             ]);
         }
-        
+
         // Check if origin is allowed
         $originAllowed = false;
         if (empty($origin) && env('APP_ENV') === 'local') {
@@ -38,7 +38,7 @@ class AuthController extends Controller
         } elseif (in_array(rtrim($origin, '/'), $allowedOrigins)) {
             $originAllowed = true;
         }
-        
+
         if ($originAllowed) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:8',
@@ -85,92 +85,118 @@ class AuthController extends Controller
                     'status' => 403
                 ])->setStatusCode(403);
             } else
-    if ($request->ref != null && $check_ref == 0) {
-                return response()->json([
-                    'message' => 'Invalid Referral Username You can Leave the referral Box Empty',
-                    'status' => '403'
-                ])->setStatusCode(403);
-            } else {
-                $user = new User();
-                $user->name = $request->name;
-                $user->username = $request->username;
-                $user->email = $request->email;
-                $user->phone = $request->phone;
-                $user->password = password_hash($request->password,  PASSWORD_DEFAULT, array('cost' => 16));
-                // $user->password = Hash::make($request->password);
-                $user->apikey =  bin2hex(openssl_random_pseudo_bytes(30));
-                $user->app_key = $user->apikey;
-                $user->bal = '0.00';
-                $user->refbal = '0.00';
-                $user->ref = $request->ref;
-                $user->type = 'SMART';
-                $user->date = Carbon::now("Africa/Lagos")->toDateTimeString();
-                $user->kyc = '0';
-                $user->status = '0';
-                $user->user_limit = $this->adex_key()->default_limit;
-                $user->pin = $request->pin;
-                $user->save();
-                if ($user != null) {
-                    $this->monnify_account($user->username);
-                    $this->paystack_account($user->username);
-                    $this->insert_stock($user->username);
-                    $user = DB::table('user')->where(['id' => $user->id])->first();
-                    $user_details = [
-                        'username' => $user->username,
-                        'name'  => $user->name,
-                        'phone' => $user->phone,
-                        'email' => $user->email,
-                        'bal' => number_format($user->bal, 2),
-                        'refbal' => number_format($user->refbal, 2),
-                        'kyc' => $user->kyc,
-                        'type' => $user->type,
-                        'pin' => $user->pin,
-                        'profile_image' => $user->profile_image,
-                        'sterlen' => $user->sterlen,
-                        'vdf' => $user->vdf,
-                        'fed' => $user->fed,
-                        'wema' => $user->wema,
-                        'rolex' => $user->rolex,
-                        'address' => $user->address,
-                        'webhook' => $user->webhook,
-                        'about' => $user->about,
-                        'apikey' => $user->apikey,
-                        'is_bvn' => $user->bvn == null ?  false : true
-                    ];
+                if ($request->ref != null && $check_ref == 0) {
+                    return response()->json([
+                        'message' => 'Invalid Referral Username You can Leave the referral Box Empty',
+                        'status' => '403'
+                    ])->setStatusCode(403);
+                } else {
+                    $user = new User();
+                    $user->name = $request->name;
+                    $user->username = $request->username;
+                    $user->email = $request->email;
+                    $user->phone = $request->phone;
+                    $user->password = password_hash($request->password, PASSWORD_DEFAULT, array('cost' => 16));
+                    // $user->password = Hash::make($request->password);
+                    $user->apikey = bin2hex(openssl_random_pseudo_bytes(30));
+                    $user->app_key = $user->apikey;
+                    $user->bal = '0.00';
+                    $user->refbal = '0.00';
+                    $user->ref = $request->ref;
+                    $user->type = 'SMART';
+                    $user->date = Carbon::now("Africa/Lagos")->toDateTimeString();
+                    $user->kyc = '0';
+                    $user->status = '0';
+                    $user->user_limit = $this->adex_key()->default_limit;
+                    $user->pin = $request->pin;
+                    $user->save();
+                    if ($user != null) {
+                        $this->monnify_account($user->username);
+                        $this->paystack_account($user->username);
+                        $this->insert_stock($user->username);
+                        $user = DB::table('user')->where(['id' => $user->id])->first();
+                        $user_details = [
+                            'username' => $user->username,
+                            'name' => $user->name,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'bal' => (float) $user->bal, // Send raw number for frontend formatting
+                            'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                            'kyc' => $user->kyc,
+                            'type' => $user->type,
+                            'pin' => $user->pin,
+                            'profile_image' => $user->profile_image,
+                            'sterlen' => $user->sterlen,
+                            'vdf' => $user->vdf,
+                            'fed' => $user->fed,
+                            'wema' => $user->wema,
+                            'rolex' => $user->rolex,
+                            'address' => $user->address,
+                            'webhook' => $user->webhook,
+                            'about' => $user->about,
+                            'apikey' => $user->apikey,
+                            'is_bvn' => $user->bvn == null ? false : true
+                        ];
 
-                    $token = $this->generatetoken($user->id);
-                    $use = $this->core();
-                    $general = $this->general();
-                    if ($use != null) {
-                        if ($use->is_verify_email) {
-                            $otp = random_int(100000, 999999);
-                            $data = [
-                                'otp' => $otp
-                            ];
-                            $tableid = [
-                                'username' => $user->username
-                            ];
-                            $this->updateData($data, 'user', $tableid);
-                            $email_data = [
-                                'name' => $user->name,
-                                'email' => $user->email,
-                                'username' => $user->username,
-                                'title' => 'Account Verification',
-                                'pin' => $user->pin,
-                                'sender_mail' => $general->app_email,
-                                'app_name' => env('APP_NAME'),
-                                'otp' => $otp
-                            ];
-                            MailController::send_mail($email_data, 'email.verify');
-                            return response()->json([
-                                'status' => 'verify',
-                                'username' => $user->username,
-                                'token' => $token,
-                                'user' =>  $user_details
-                            ]);
+                        $token = $this->generatetoken($user->id);
+                        $use = $this->core();
+                        $general = $this->general();
+                        if ($use != null) {
+                            if ($use->is_verify_email) {
+                                $otp = random_int(100000, 999999);
+                                $data = [
+                                    'otp' => $otp
+                                ];
+                                $tableid = [
+                                    'username' => $user->username
+                                ];
+                                $this->updateData($data, 'user', $tableid);
+                                $email_data = [
+                                    'name' => $user->name,
+                                    'email' => $user->email,
+                                    'username' => $user->username,
+                                    'title' => 'Account Verification',
+                                    'pin' => $user->pin,
+                                    'sender_mail' => $general->app_email,
+                                    'app_name' => env('APP_NAME'),
+                                    'otp' => $otp
+                                ];
+                                MailController::send_mail($email_data, 'email.verify');
+                                return response()->json([
+                                    'status' => 'verify',
+                                    'username' => $user->username,
+                                    'token' => $token,
+                                    'user' => $user_details
+                                ]);
+                            } else {
+                                $data = [
+                                    'status' => 1
+                                ];
+                                $tableid = [
+                                    'username' => $user->username
+                                ];
+                                $this->updateData($data, 'user', $tableid);
+                                $email_data = [
+                                    'name' => $user->name,
+                                    'email' => $user->email,
+                                    'username' => $user->username,
+                                    'title' => 'WELCOME EMAIL',
+                                    'sender_mail' => $general->app_email,
+                                    'system_email' => $general->app_email,
+                                    'app_name' => $general->app_name,
+                                    'pin' => $user->pin,
+                                ];
+                                MailController::send_mail($email_data, 'email.welcome');
+                                return response()->json([
+                                    'status' => 'success',
+                                    'username' => $user->username,
+                                    'token' => $token,
+                                    'user' => $user_details
+                                ]);
+                            }
                         } else {
                             $data = [
-                                'status' => 1
+                                'status' => 1,
                             ];
                             $tableid = [
                                 'username' => $user->username
@@ -191,44 +217,18 @@ class AuthController extends Controller
                                 'status' => 'success',
                                 'username' => $user->username,
                                 'token' => $token,
-                                'user' =>  $user_details
+                                'user' => $user_details
                             ]);
                         }
                     } else {
-                        $data = [
-                            'status' => 1,
-                        ];
-                        $tableid = [
-                            'username' => $user->username
-                        ];
-                        $this->updateData($data, 'user', $tableid);
-                        $email_data = [
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'username' => $user->username,
-                            'title' => 'WELCOME EMAIL',
-                            'sender_mail' => $general->app_email,
-                            'system_email' => $general->app_email,
-                            'app_name' => $general->app_name,
-                            'pin' => $user->pin,
-                        ];
-                        MailController::send_mail($email_data, 'email.welcome');
-                        return response()->json([
-                            'status' => 'success',
-                            'username' => $user->username,
-                            'token' => $token,
-                            'user' =>  $user_details
-                        ]);
+                        return response()->json(
+                            [
+                                'status' => 403,
+                                'message' => 'Unable to Register User Please Try Again Later',
+                            ]
+                        )->setStatusCode(403);
                     }
-                } else {
-                    return response()->json(
-                        [
-                            'status' => 403,
-                            'message' => 'Unable to Register User Please Try Again Later',
-                        ]
-                    )->setStatusCode(403);
                 }
-            }
         } else {
             return response()->json([
                 'status' => 403,
@@ -242,7 +242,7 @@ class AuthController extends Controller
         $origin = $request->headers->get('origin');
         $adexAppKey = env('ADEX_APP_KEY', '');
         $allowedOrigins = array_filter(array_map('trim', explode(',', $adexAppKey)));
-        
+
         if (env('APP_ENV') === 'local') {
             $allowedOrigins = array_merge($allowedOrigins, [
                 'http://localhost:3000',
@@ -253,7 +253,7 @@ class AuthController extends Controller
                 'http://127.0.0.1:8000'
             ]);
         }
-        
+
         // Check if origin is allowed
         $originAllowed = false;
         if (empty($origin) && env('APP_ENV') === 'local') {
@@ -261,7 +261,7 @@ class AuthController extends Controller
         } elseif (in_array(rtrim($origin, '/'), $allowedOrigins)) {
             $originAllowed = true;
         }
-        
+
         if ($originAllowed) {
             try {
                 $user_token = $request->id;
@@ -282,73 +282,73 @@ class AuthController extends Controller
                             // Log but don't fail if insert_stock fails
                             \Log::warning('insert_stock failed: ' . $e->getMessage());
                         }
-                    $user = DB::table('user')->where(['id' => $user->id])->first();
-                    $user_details = [
-                        'username' => $user->username,
-                        'name'  => $user->name,
-                        'phone' => $user->phone,
-                        'email' => $user->email,
-                        'bal' => number_format($user->bal, 2),
-                        'refbal' => number_format($user->refbal, 2),
-                        'kyc' => $user->kyc,
-                        'type' => $user->type,
-                        'pin' => $user->pin,
-                        'profile_image' => $user->profile_image,
-                        'sterlen' => $user->sterlen,
-                        'fed' => $user->fed,
-                        'wema' => $user->wema,
-                        'rolex' => $user->rolex,
-                        'vdf' => $user->vdf,
-                        'address' => $user->address,
-                        'webhook' => $user->webhook,
-                        'about' => $user->about,
-                        'apikey' => $user->apikey,
-                        'is_bvn' => $user->bvn == null ?  false : true
-                    ];
+                        $user = DB::table('user')->where(['id' => $user->id])->first();
+                        $user_details = [
+                            'username' => $user->username,
+                            'name' => $user->name,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'bal' => (float) $user->bal, // Send raw number for frontend formatting
+                            'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
+                            'kyc' => $user->kyc,
+                            'type' => $user->type,
+                            'pin' => $user->pin,
+                            'profile_image' => $user->profile_image,
+                            'sterlen' => $user->sterlen,
+                            'fed' => $user->fed,
+                            'wema' => $user->wema,
+                            'rolex' => $user->rolex,
+                            'vdf' => $user->vdf,
+                            'address' => $user->address,
+                            'webhook' => $user->webhook,
+                            'about' => $user->about,
+                            'apikey' => $user->apikey,
+                            'is_bvn' => $user->bvn == null ? false : true
+                        ];
 
-                    if ($user->status == 0) {
-                        return response()->json([
-                            'status' => 'verify',
-                            'message' => 'Account Not Yet Verified',
-                            'user' => $user_details
-                        ]);
-                    } else if ($user->status == 1) {
-                        //set up the user over here
+                        if ($user->status == 0) {
+                            return response()->json([
+                                'status' => 'verify',
+                                'message' => 'Account Not Yet Verified',
+                                'user' => $user_details
+                            ]);
+                        } else if ($user->status == 1) {
+                            //set up the user over here
 
 
-                        return response()->json([
-                            'status' => 'success',
-                            'message' => 'account verified',
-                            'user' => $user_details
-                        ]);
-                    } else if ($user->status == '2') {
-                        return response()->json([
-                            'status' => 403,
-                            'message' => 'Account Banned'
-                        ])->setStatusCode(403);
-                    } elseif ($user->status == '3') {
-                        return response()->json([
-                            'status' => 403,
-                            'message' => 'Account Deactivated'
-                        ])->setStatusCode(403);
+                            return response()->json([
+                                'status' => 'success',
+                                'message' => 'account verified',
+                                'user' => $user_details
+                            ]);
+                        } else if ($user->status == '2') {
+                            return response()->json([
+                                'status' => 403,
+                                'message' => 'Account Banned'
+                            ])->setStatusCode(403);
+                        } elseif ($user->status == '3') {
+                            return response()->json([
+                                'status' => 403,
+                                'message' => 'Account Deactivated'
+                            ])->setStatusCode(403);
+                        } else {
+                            return response()->json([
+                                'status' => 403,
+                                'message' => 'Unable to Get User'
+                            ])->setStatusCode(403);
+                        }
                     } else {
                         return response()->json([
                             'status' => 403,
-                            'message' => 'Unable to Get User'
+                            'message' => 'Not Allowed',
                         ])->setStatusCode(403);
                     }
                 } else {
                     return response()->json([
                         'status' => 403,
-                        'message' => 'Not Allowed',
+                        'message' => 'AccessToken Expired'
                     ])->setStatusCode(403);
                 }
-            } else {
-                return response()->json([
-                    'status' => 403,
-                    'message' => 'AccessToken Expired'
-                ])->setStatusCode(403);
-            }
             } catch (\Exception $e) {
                 \Log::error('Account endpoint error: ' . $e->getMessage(), [
                     'trace' => $e->getTraceAsString()
@@ -377,11 +377,11 @@ class AuthController extends Controller
                 $user = DB::table('user')->where(['id' => $user->id])->first();
                 $user_details = [
                     'username' => $user->username,
-                    'name'  => $user->name,
+                    'name' => $user->name,
                     'phone' => $user->phone,
                     'email' => $user->email,
-                    'bal' => number_format($user->bal, 2),
-                    'refbal' => number_format($user->refbal, 2),
+                    'bal' => (float) $user->bal, // Send raw number for frontend formatting
+                    'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
                     'kyc' => $user->kyc,
                     'type' => $user->type,
                     'pin' => $user->pin,
@@ -395,7 +395,7 @@ class AuthController extends Controller
                     'vdf' => $user->vdf,
                     'about' => $user->about,
                     'apikey' => $user->apikey,
-                    'is_bvn' => $user->bvn == null ?  false : true
+                    'is_bvn' => $user->bvn == null ? false : true
                 ];
                 if ($user->otp == $request->code) {
                     //if success
@@ -470,11 +470,11 @@ class AuthController extends Controller
                     $user = DB::table('user')->where(['id' => $user->id])->first();
                     $user_details = [
                         'username' => $user->username,
-                        'name'  => $user->name,
+                        'name' => $user->name,
                         'phone' => $user->phone,
                         'email' => $user->email,
-                        'bal' => number_format($user->bal, 2),
-                        'refbal' => number_format($user->refbal, 2),
+                        'bal' => (float) $user->bal, // Send raw number for frontend formatting
+                        'refbal' => (float) $user->refbal, // Send raw number for frontend formatting
                         'kyc' => $user->kyc,
                         'type' => $user->type,
                         'pin' => $user->pin,
@@ -488,7 +488,7 @@ class AuthController extends Controller
                         'about' => $user->about,
                         'vdf' => $user->vdf,
                         'apikey' => $user->apikey,
-                        'is_bvn' => $user->bvn == null ?  false : true
+                        'is_bvn' => $user->bvn == null ? false : true
                     ];
                     $hash = substr(sha1(md5($request->password)), 3, 10);
                     $mdpass = md5($request->password);

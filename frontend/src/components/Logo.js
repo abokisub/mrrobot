@@ -8,10 +8,15 @@ Logo.propTypes = {
 };
 
 export default function Logo({ disabledLink = false, sx }) {
-  // Use process.env.PUBLIC_URL for production builds, fallback to empty string for dev
-  // PUBLIC_URL is typically empty unless deploying to a subdirectory
-  const publicUrl = (process.env.PUBLIC_URL || '').replace(/\/$/, ''); // Remove trailing slash
-  const logoPath = publicUrl ? `${publicUrl}/assets/images/logo.png` : '/assets/images/logo.png';
+  // In production, React build is in Laravel's public folder
+  // Assets should be accessible at /assets/images/logo.png
+  // Try multiple paths to ensure it works in all environments
+  const getLogoPath = () => {
+    // First try: Standard React build path
+    return '/assets/images/logo.png';
+  };
+  
+  const logoPath = getLogoPath();
   
   const logo = (
     <Box 
@@ -19,16 +24,27 @@ export default function Logo({ disabledLink = false, sx }) {
       src={logoPath}
       alt="KoboPoint Logo"
       onError={(e) => {
-        // Fallback: try alternative paths if primary fails
+        // Fallback paths for different server configurations
         const currentSrc = e.target.src;
-        const basePath = publicUrl || '';
-        if (!currentSrc.includes('/static/logo.png')) {
-          e.target.src = `${basePath}/static/logo.png`;
-        } else if (!currentSrc.includes('/logo.png')) {
-          e.target.src = `${basePath}/logo.png`;
+        const baseUrl = window.location.origin;
+        
+        // Try different paths
+        const fallbackPaths = [
+          '/assets/images/logo.png',
+          '/static/media/logo.png',
+          '/static/logo.png',
+          '/logo.png',
+          `${baseUrl}/assets/images/logo.png`,
+          `${baseUrl}/public/assets/images/logo.png`
+        ];
+        
+        const currentIndex = fallbackPaths.findIndex(path => currentSrc.includes(path) || currentSrc.endsWith(path));
+        const nextIndex = currentIndex + 1;
+        
+        if (nextIndex < fallbackPaths.length) {
+          e.target.src = fallbackPaths[nextIndex];
         } else {
-          // If all fail, log warning but keep trying
-          console.warn('Logo image not found. Tried:', logoPath);
+          console.warn('Logo image not found. Tried all paths:', fallbackPaths);
         }
       }}
       sx={{ 

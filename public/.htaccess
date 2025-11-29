@@ -27,9 +27,11 @@
     RewriteRule ^ - [L]
 
     # Handle React Router - serve index.html for non-API routes
+    # Exclude static assets, API, storage, and static directories
     RewriteCond %{REQUEST_URI} !^/api/
     RewriteCond %{REQUEST_URI} !^/storage/
     RewriteCond %{REQUEST_URI} !^/static/
+    RewriteCond %{REQUEST_URI} !^/assets/
     RewriteCond %{REQUEST_URI} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-l

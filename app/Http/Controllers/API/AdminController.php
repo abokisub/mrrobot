@@ -354,7 +354,7 @@ class  AdminController extends Controller
                         $user->webhook = $request->webhook;
                         $user->about = $request->about;
                         $user->address = $request->address;
-                        $user->profile_image = url('') . '/' . $path;
+                        $user->profile_image = $path ? asset('storage/' . $path) : null;
                         $user->save();
                         if ($user != null) {
                             $general = $this->general();
@@ -537,7 +537,8 @@ class  AdminController extends Controller
                                 $profile_image = $request->file('profile_image');
                                 $profile_image_name = $request->username . '_' . $profile_image->getClientOriginalName();
                                 $save_here = 'profile_image';
-                                $path = url('') . '/' . $request->file('profile_image')->storeAs($save_here, $profile_image_name);
+                                $stored_path = $request->file('profile_image')->storeAs($save_here, $profile_image_name);
+                                $path = asset('storage/' . $stored_path);
                             }
                         } else {
                             $path = $request->profile_image;

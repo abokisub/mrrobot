@@ -1851,7 +1851,7 @@ class Auth extends Controller
                     $profile_image_name = $user->username . '_' . $image->getClientOriginalName();
 
                     $path = $request->file('image')->storeAs($save_here, $profile_image_name);
-                    DB::table('user')->where(['id' => $user->id])->update(['profile_image' => url('') . '/' . $path]);
+                    DB::table('user')->where(['id' => $user->id])->update(['profile_image' => asset('storage/' . $path)]);
                     
                     $user = DB::table('user')->where(['status' => 1, 'id' => $user->id])->first();
                       $user_details = [

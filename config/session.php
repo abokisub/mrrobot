@@ -34,6 +34,15 @@ return [
     'lifetime' => env('SESSION_LIFETIME', 120),
 
     'expire_on_close' => false,
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Session Cookie Same-Site
+    |--------------------------------------------------------------------------
+    |
+    | Set to 'lax' for better compatibility with cPanel/production
+    |
+    */
 
     /*
     |--------------------------------------------------------------------------
@@ -168,7 +177,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') === 'production' ? true : null),
 
     /*
     |--------------------------------------------------------------------------

@@ -276,10 +276,33 @@ function AuthProvider({ children }) {
           },
         });
       } else {
-        throw new Error(res.data.message || 'Verification failed');
+        // Handle different error statuses
+        const errorMsg = res.data.message || 'Verification failed';
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Invalid OTP. Please try again.';
+      // Extract error message from response
+      let errorMessage = 'Invalid OTP. Please try again.';
+      
+      if (error?.response?.data) {
+        const responseData = error.response.data;
+        if (responseData.message) {
+          errorMessage = responseData.message;
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        } else if (typeof responseData === 'string') {
+          errorMessage = responseData;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      // Don't show "contact admin" - provide more helpful messages
+      if (errorMessage.toLowerCase().includes('contact admin') || 
+          errorMessage.toLowerCase().includes('unable to authenticate')) {
+        errorMessage = 'Unable to verify OTP. Please check your connection and try again, or request a new OTP.';
+      }
+      
       throw new Error(errorMessage);
     }
   };

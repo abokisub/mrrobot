@@ -1,23 +1,19 @@
 import PropTypes from 'prop-types';
 // @mui
 import { styled } from '@mui/material/styles';
-import { Box, Stack, AppBar, Toolbar } from '@mui/material';
+import { Box, Stack, AppBar, Toolbar, Typography, Badge } from '@mui/material';
 // hooks
 import useOffSetTop from '../../../hooks/useOffSetTop';
 import useResponsive from '../../../hooks/useResponsive';
 import useAuth from '../../../hooks/useAuth';
-import { Typography } from '@mui/material';
 // utils
 import cssStyles from '../../../utils/cssStyles';
 // config
 import { HEADER, NAVBAR } from '../../../config';
 // components
-import Logo from '../../../components/Logo';
 import Iconify from '../../../components/Iconify';
 import { IconButtonAnimate } from '../../../components/animate';
-//
 import AccountPopover from './AccountPopover';
-import NotificationsPopover from './NotificationsPopover';
 
 // ----------------------------------------------------------------------
 
@@ -34,16 +30,14 @@ const RootStyle = styled(AppBar, {
   [theme.breakpoints.up('lg')]: {
     height: HEADER.DASHBOARD_DESKTOP_HEIGHT,
     width: `calc(100% - ${NAVBAR.DASHBOARD_WIDTH + 1}px)`,
+    ...(verticalLayout && {
+      width: '100%',
+    }),
     ...(isCollapse && {
       width: `calc(100% - ${NAVBAR.DASHBOARD_COLLAPSE_WIDTH}px)`,
     }),
     ...(isOffset && {
       height: HEADER.DASHBOARD_DESKTOP_OFFSET_HEIGHT,
-    }),
-    ...(verticalLayout && {
-      width: '100%',
-      height: HEADER.DASHBOARD_DESKTOP_OFFSET_HEIGHT,
-      backgroundColor: theme.palette.background.default,
     }),
   },
 }));
@@ -57,8 +51,7 @@ DashboardHeader.propTypes = {
 };
 
 export default function DashboardHeader({ onOpenSidebar, isCollapse = false, verticalLayout = false }) {
-  const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT) && !verticalLayout;
-
+  const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT);
   const isDesktop = useResponsive('up', 'lg');
   const { user } = useAuth();
 
@@ -72,56 +65,62 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           overflow: 'visible'
         }}
       >
-        {isDesktop && verticalLayout && <Logo sx={{ mr: 2.5 }} />}
-
+        {/* Left Section: Menu + Greeting */}
         {!isDesktop && (
           <IconButtonAnimate onClick={onOpenSidebar} sx={{ mr: 1, color: 'text.primary', flexShrink: 0 }}>
             <Iconify icon="eva:menu-2-fill" />
           </IconButtonAnimate>
         )}
 
-        <Stack 
-          direction="row" 
-          alignItems="center" 
-          spacing={0.5} 
-          sx={{ 
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.5}
+          sx={{
             flexShrink: 0,
             minWidth: 'fit-content',
-            maxWidth: { xs: 'calc(100vw - 200px)', sm: 'none' }
+            maxWidth: { xs: 'calc(100vw - 120px)', sm: 'none' }
           }}
         >
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              color: 'text.primary', 
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'text.primary',
               fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
               display: 'block',
               whiteSpace: 'nowrap',
               flexShrink: 0,
-              overflow: 'visible',
-              textOverflow: 'clip'
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}
           >
-            Hi {user?.username || ''}
+            Hi {user?.username || 'User'}
           </Typography>
           {user?.kyc === 1 && (
-            <Iconify 
-              icon="eva:checkmark-circle-2-fill" 
-              sx={{ 
-                color: 'success.main', 
-                width: { xs: 18, md: 20 }, 
+            <Iconify
+              icon="eva:checkmark-circle-2-fill"
+              sx={{
+                color: 'success.main',
+                width: { xs: 18, md: 20 },
                 height: { xs: 18, md: 20 },
                 display: { xs: 'none', md: 'block' },
                 flexShrink: 0
-              }} 
+              }}
             />
           )}
         </Stack>
 
         <Box sx={{ flexGrow: 1 }} />
 
+        {/* Right Section: Icons */}
         <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }}>
-          <NotificationsPopover />
+          {/* Search Icon Removed as requested */}
+
+          <IconButtonAnimate>
+            <Badge badgeContent={4} color="error">
+              <Iconify icon="eva:bell-fill" width={20} height={20} />
+            </Badge>
+          </IconButtonAnimate>
 
           <AccountPopover />
         </Stack>

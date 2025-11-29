@@ -302,12 +302,38 @@ class AuthController extends Controller
                         }
                         
                         $user = DB::table('user')->where(['id' => $user->id])->first();
-                        $user_details = $this->getUserDetailsWithBellBank($user);
-
+                        
+                        // CRITICAL: Always check status == 0 FIRST before any other checks
+                        // This ensures unverified users (status 0) always require verification,
+                        // even if OTP has expired or been cleared
                         if ($user->status == 0) {
+                            // For unverified users, check if OTP expired and resend if needed
+                            $hasOtp = !empty($user->otp);
+                            $otpExpired = false;
+                            
+                            if ($hasOtp && isset($user->otp_expires_at) && $user->otp_expires_at) {
+                                try {
+                                    if (Carbon::now()->gt(Carbon::parse($user->otp_expires_at))) {
+                                        $otpExpired = true;
+                                        // Clear expired OTP for unverified user
+                                        $this->updateData([
+                                            'otp' => null,
+                                            'otp_expires_at' => null
+                                        ], 'user', ['id' => $user->id]);
+                                        // Refresh user data after clearing OTP
+                                        $user = DB::table('user')->where(['id' => $user->id])->first();
+                                    }
+                                } catch (\Exception $e) {
+                                    \Log::warning('OTP expiration check failed for unverified user: ' . $e->getMessage());
+                                }
+                            }
+                            
+                            $user_details = $this->getUserDetailsWithBellBank($user);
+                            
+                            // Always return 'verify' for status 0 users, regardless of OTP state
                             return response()->json([
                                 'status' => 'verify',
-                                'message' => 'Account Not Yet Verified',
+                                'message' => 'Account Not Yet Verified' . ($otpExpired ? '. Please request a new OTP.' : ''),
                                 'user' => $user_details
                             ]);
                         } else if ($user->status == 1) {
@@ -532,6 +558,8 @@ class AuthController extends Controller
                             'pin' => $user->pin,
                             'apikey' => $user->apikey,
                             'is_bvn' => $user->bvn == null ? false : true,
+                            'status' => isset($user->status) ? (int) $user->status : 0, // Critical: Include status for frontend verification checks
+                            'otp' => $user->otp ?? null, // Include OTP so frontend can check for pending verification
                         ];
                     }
                     
@@ -1136,6 +1164,8 @@ class AuthController extends Controller
             'about' => $user->about ?? null,
             'apikey' => $user->apikey ?? null,
             'is_bvn' => isset($user->bvn) && $user->bvn != null,
+            'status' => isset($user->status) ? (int) $user->status : 0, // Critical: Include status for frontend verification checks
+            'otp' => $user->otp ?? null, // Include OTP so frontend can check for pending verification
             'bellbank_account' => $bellAccount ? [
                 'account_number' => $bellAccount->account_number ?? null,
                 'bank_name' => $bellAccount->bank_name ?: 'BellBank',

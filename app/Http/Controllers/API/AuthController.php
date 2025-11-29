@@ -140,8 +140,13 @@ class AuthController extends Controller
                         if ($use != null) {
                             if ($use->is_verify_email) {
                                 $otp = random_int(100000, 999999);
+                                
+                                // Set OTP expiration to 60 seconds from now
+                                $otpExpiresAt = Carbon::now()->addSeconds(60);
+                                
                                 $data = [
-                                    'otp' => $otp
+                                    'otp' => $otp,
+                                    'otp_expires_at' => $otpExpiresAt
                                 ];
                                 $tableid = [
                                     'username' => $user->username
@@ -387,8 +392,31 @@ class AuthController extends Controller
     }
     public function verify(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             $adex_check = DB::table('user')->where('email', $request->email);
             if ($adex_check->count() == 1) {
                 $user = $adex_check->get()[0];
@@ -809,16 +837,44 @@ class AuthController extends Controller
     }
     public function resendOtp(Request $request)
     {
-        $explode_url = explode(',', env('ADEX_APP_KEY'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowedOrigins = array_filter(array_map('trim', explode(',', config('adex.app_key', ''))));
+        $origin = $request->headers->get('origin');
+        $originNormalized = rtrim($origin ?: '', '/');
+        $referer = $request->headers->get('referer');
+        $host = $request->getHost();
+        $scheme = $request->getScheme();
+        $fullUrl = $scheme . '://' . $host;
+        
+        // Check if request is from same origin (no Origin header for same-origin requests)
+        $isSameOrigin = empty($origin) && $referer && strpos($referer, $fullUrl) === 0;
+        
+        // Also check if the referer matches any allowed origin
+        $refererMatches = false;
+        if ($referer) {
+            $refererUrl = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            $refererNormalized = rtrim($refererUrl ?: '', '/');
+            $refererMatches = in_array($refererNormalized, $allowedOrigins);
+        }
+        
+        // Allow if: origin matches, referer matches, same-origin request, or device key matches
+        if (in_array($originNormalized, $allowedOrigins) 
+            || $refererMatches 
+            || $isSameOrigin 
+            || config('adex.device_key') === $request->header('Authorization')
+            || in_array($fullUrl, $allowedOrigins)) {
             if (isset($request->id)) {
                 $sel_user = DB::table('user')->where('email', $request->id);
                 if ($sel_user->count() == 1) {
                     $user = $sel_user->get()[0];
                     $general = $this->general();
                     $otp = random_int(100000, 999999);
+                    
+                    // Set OTP expiration to 60 seconds from now
+                    $otpExpiresAt = Carbon::now()->addSeconds(60);
+                    
                     $data = [
-                        'otp' => $otp
+                        'otp' => $otp,
+                        'otp_expires_at' => $otpExpiresAt
                     ];
                     $tableid = [
                         'username' => $user->username
@@ -835,8 +891,9 @@ class AuthController extends Controller
                     ];
                     MailController::send_mail($email_data, 'email.verify');
                     return response()->json([
-                        'status' => 'status',
-                        'message' => 'New OTP Resent to Your Email'
+                        'status' => 'success',
+                        'message' => 'New OTP Resent to Your Email',
+                        'expires_at' => $otpExpiresAt->toISOString()
                     ]);
                 } else {
                     return response()->json([
@@ -851,11 +908,9 @@ class AuthController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System',
-
             ])->setStatusCode(403);
         }
     }

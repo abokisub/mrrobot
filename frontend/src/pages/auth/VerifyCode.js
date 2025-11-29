@@ -28,7 +28,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 }));
 
 // ----------------------------------------------------------------------
-function Resend (email){
+function Resend (email, onResendSuccess){
   swal({
     title: "Note",
     text: "Do You Want A New OTP?",
@@ -42,7 +42,19 @@ function Resend (email){
     if (willDelete) {
   axios.get(`/api/user/resend/${email}/otp`,{
 }).then(resp => {
+    // Update expiration time in localStorage (60 seconds from now)
+    const expirationTime = new Date(Date.now() + 60000).toISOString();
+    localStorage.setItem('otp_expires_at', expirationTime);
+    
+    // Trigger custom event to notify VerifyCodeForm to reset expiration
+    window.dispatchEvent(new CustomEvent('otpResent', { detail: { expiresAt: expirationTime } }));
+    
     swal(resp.data.message);
+    
+    // Call callback if provided
+    if (onResendSuccess) {
+      onResendSuccess();
+    }
 }).catch(error => {
     if(error.message === ''){
       swal('Opps!','An Error Occured','error');
@@ -63,18 +75,24 @@ export default function VerifyCode() {
   useEffect(() => {
     // Only redirect if authentication is fully initialized
     if (isAuthenticated === true) {
-      // Check if user still has pending OTP (needs verification)
+      // Check if user status is 0 (unverified) - this is the primary check
+      const isUnverified = user && user.status === 0;
+      
+      // Also check if user still has pending OTP (needs verification)
       const hasPendingOtp = user && user.otp && user.otp.toString().trim() !== '';
       
-      if (!hasPendingOtp) {
-        // User is fully verified with no pending OTP - redirect to dashboard
-        // Small delay to prevent flash of verify page
-        const timer = setTimeout(() => {
-          navigate(PATH_DASHBOARD.general.app, { replace: true });
-        }, 100);
-        return () => clearTimeout(timer);
+      // If user is unverified (status === 0) OR has pending OTP, stay on verify page
+      if (isUnverified || hasPendingOtp) {
+        // User needs verification - stay on verify page
+        return;
       }
-      // User has pending OTP - stay on verify page
+      
+      // User is fully verified with no pending OTP - redirect to dashboard
+      // Small delay to prevent flash of verify page
+      const timer = setTimeout(() => {
+        navigate(PATH_DASHBOARD.general.app, { replace: true });
+      }, 100);
+      return () => clearTimeout(timer);
     } else if (isAuthenticated !== 'verify' && isAuthenticated !== false && isAuthenticated !== null) {
       // User is not in verify state and not authenticated, redirect to login
       navigate(PATH_AUTH.login, { replace: true });

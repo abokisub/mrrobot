@@ -78,8 +78,19 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           </IconButtonAnimate>
         )}
 
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <Typography variant="h6" sx={{ color: 'text.primary', fontSize: { xs: '0.875rem', md: '1.25rem' } }}>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: '0 0 auto' }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'text.primary', 
+              fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+              display: { xs: 'block', sm: 'block' },
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: { xs: '120px', sm: '200px', md: 'none' }
+            }}
+          >
             Hi {user?.username}
           </Typography>
           {user?.kyc === 1 && (

@@ -36,18 +36,20 @@ export default function Automated() {
   const isDesktop = useResponsive('up', 'lg');
   const { enqueueSnackbar } = useSnackbar();
   const accessToken = localStorage.getItem('accessToken');
-  const [loading,SetLoading] = useState(false);
+  const [loading,SetLoading] = useState(true);
   const [banks,SetBanks] = useState([]);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
     fetchBanks();
-  },[]);
+  },[user]);
   
   const fetchBanks = async() => {
     try{
       SetLoading(true);
+      setError(null);
       const response = await axios.get(`/api/check/banks/user/gstar/${accessToken}/secure/this/site/here`)
-      if (response.data && response.data.banks) {
+      if (response.data && response.data.banks && Array.isArray(response.data.banks)) {
         SetBanks(response.data.banks);
       } else {
         // If API fails, check if user has BellBank account
@@ -60,10 +62,13 @@ export default function Automated() {
             isDefault: true,
             accountName: user.bellbank_account.account_name || user.username
           }]);
+        } else {
+          SetBanks([]);
         }
       }
     }catch (error) {
       console.error('Error fetching Banks:', error);
+      setError(error.message || 'Failed to load bank accounts');
       // Fallback: Show BellBank account if available in user object
       if (user?.bellbank_account?.account_number) {
         SetBanks([{
@@ -74,6 +79,8 @@ export default function Automated() {
           isDefault: true,
           accountName: user.bellbank_account.account_name || user.username
         }]);
+      } else {
+        SetBanks([]);
       }
     }
     finally{
@@ -91,9 +98,12 @@ export default function Automated() {
   const bellbankAccount = user?.bellbank_account;
   const hasBellbankAccount = bellbankAccount && bellbankAccount.account_number;
 
+  // Get app name safely
+  const appName = setting?.general?.app_name || APP_NAME || 'KoboPoint';
+
   return (
     <Page title="Automated Bank Transfer">
-    {loading && banks.length === 0 ? (
+    {loading && banks.length === 0 && !hasBellbankAccount ? (
        <div style={{ textAlign: 'center', marginTop: '30px' }}>
                             <Lottie animationData={animationData} style={{ maxWidth: '300px', margin: 'auto' }} />
                             <h4 style={{ fontWeight: 'bold' }}>
@@ -115,6 +125,11 @@ export default function Automated() {
             { name: 'adex-system' },
           ]}
         />
+        {error && (
+          <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
         <Stack spacing={3}>
           {/* Show BellBank account if available but not in banks array yet */}
           {hasBellbankAccount && banks.length === 0 && !loading && (
@@ -147,7 +162,7 @@ export default function Automated() {
                     Bank Name: {bellbankAccount.bank_name || 'BellBank'}
                   </Typography>
                   <Typography variant="body2" noWrap>
-                    Account Name: <b>{`${setting?.general?.app_name || APP_NAME} - ${user?.username || ''}`}</b>
+                    Account Name: <b>{`${appName} - ${user?.username || ''}`}</b>
                   </Typography>
                   <Typography variant="body2" noWrap>
                     Charges: 0 NAIRA
@@ -197,7 +212,7 @@ export default function Automated() {
               Bank Name: {bank.name}
             </Typography>
             <Typography variant="body2" noWrap>
-              Account Name: <b>{`${setting?.general?.app_name || APP_NAME} - ${user?.username || ''}`}</b>
+              Account Name: <b>{`${appName} - ${user?.username || ''}`}</b>
             </Typography>
             <Typography variant="body2" noWrap>
               Charges: {bank.charges}

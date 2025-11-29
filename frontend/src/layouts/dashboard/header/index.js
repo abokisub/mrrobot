@@ -73,22 +73,31 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
         {isDesktop && verticalLayout && <Logo sx={{ mr: 2.5 }} />}
 
         {!isDesktop && (
-          <IconButtonAnimate onClick={onOpenSidebar} sx={{ mr: 1, color: 'text.primary' }}>
+          <IconButtonAnimate onClick={onOpenSidebar} sx={{ mr: 1, color: 'text.primary', flexShrink: 0 }}>
             <Iconify icon="eva:menu-2-fill" />
           </IconButtonAnimate>
         )}
 
-        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: '0 0 auto' }}>
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          spacing={0.5} 
+          sx={{ 
+            flexShrink: 0,
+            minWidth: 'fit-content',
+            maxWidth: { xs: 'calc(100vw - 200px)', sm: 'none' }
+          }}
+        >
           <Typography 
             variant="h6" 
-            noWrap={false}
             sx={{ 
               color: 'text.primary', 
               fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
-              display: { xs: 'block', sm: 'block' },
+              display: 'block',
               whiteSpace: 'nowrap',
               flexShrink: 0,
-              overflow: 'visible'
+              overflow: 'visible',
+              textOverflow: 'clip'
             }}
           >
             Hi {user?.username || ''}
@@ -100,7 +109,8 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
                 color: 'success.main', 
                 width: { xs: 18, md: 20 }, 
                 height: { xs: 18, md: 20 },
-                display: { xs: 'none', md: 'block' }
+                display: { xs: 'none', md: 'block' },
+                flexShrink: 0
               }} 
             />
           )}

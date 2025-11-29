@@ -137,6 +137,17 @@ export const PATH_ADMIN = {
     exam: path(ROOTS_ADMIN, '/selection/exam'),
     data_card: path(ROOTS_ADMIN, '/selection/data_card'),
     recharge_card: path(ROOTS_ADMIN, '/selection/recharge_card')
+  },
+  bellbank: {
+    root: path(ROOTS_ADMIN, '/bellbank'),
+    accounts: path(ROOTS_ADMIN, '/bellbank/accounts'),
+    transactions: path(ROOTS_ADMIN, '/bellbank/transactions'),
+    banks: path(ROOTS_ADMIN, '/bellbank/banks'),
+    name_enquiry: path(ROOTS_ADMIN, '/bellbank/name-enquiry'),
+    transfers: path(ROOTS_ADMIN, '/bellbank/transfers'),
+    kyc: path(ROOTS_ADMIN, '/bellbank/kyc'),
+    webhooks: path(ROOTS_ADMIN, '/bellbank/webhooks'),
+    settings: path(ROOTS_ADMIN, '/bellbank/settings')
   }
 }
 export const PATH_DASHBOARD = {

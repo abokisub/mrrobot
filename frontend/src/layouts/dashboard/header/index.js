@@ -54,6 +54,11 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
   const isOffset = useOffSetTop(HEADER.DASHBOARD_DESKTOP_HEIGHT);
   const isDesktop = useResponsive('up', 'lg');
   const { user } = useAuth();
+  
+  // Debug: Log user object to help identify issues
+  if (user && (!user.username || user.username.trim() === '')) {
+    console.log('User object in header:', { username: user.username, name: user.name, user });
+  }
 
   return (
     <RootStyle isCollapse={isCollapse} isOffset={isOffset} verticalLayout={verticalLayout}>

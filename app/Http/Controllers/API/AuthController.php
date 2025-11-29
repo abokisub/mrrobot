@@ -684,7 +684,45 @@ class AuthController extends Controller
                     }
                     
                     // Password is valid, user status is 1 (active)
-                    // STEP 2: Check session status
+                    
+                    // ADMIN BYPASS: Skip OTP for admin users
+                    if ($user->type === 'ADMIN') {
+                        // Mark device as trusted for admin
+                        try {
+                            $deviceFingerprint = $this->generateDeviceFingerprint($request);
+                            $this->storeDeviceInfo($user->id, $request, true);
+                            \Log::info('Admin user logged in without OTP', [
+                                'user_id' => $user->id,
+                                'username' => $user->username,
+                                'device_fingerprint' => substr($deviceFingerprint, 0, 20) . '...'
+                            ]);
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to store device info for admin: ' . $e->getMessage());
+                        }
+                        
+                        // Initialize monnify and stock for admin
+                        try {
+                            $this->monnify_account($user->username);
+                            $this->insert_stock($user->username);
+                        } catch (\Exception $e) {
+                            \Log::warning('Failed to initialize monnify/stock for admin: ' . $e->getMessage());
+                        }
+                        
+                        // Get updated user details
+                        $user = DB::table('user')->where(['id' => $user->id])->first();
+                        $user_details = $this->getUserDetailsWithBellBank($user);
+                        
+                        $token = $this->generatetoken($user->id);
+                        
+                        return response()->json([
+                            'status' => 'success',
+                            'message' => 'Login successful',
+                            'user' => $user_details,
+                            'token' => $token
+                        ]);
+                    }
+                    
+                    // STEP 2: Check session status (for non-admin users)
                     $deviceFingerprint = $this->generateDeviceFingerprint($request);
                     $device = DB::table('user_devices')
                         ->where('user_id', $user->id)
@@ -695,9 +733,9 @@ class AuthController extends Controller
                     $isTrustedDevice = $device !== null;
                     
                     // Per user requirement: "OTP must NEVER be skipped after password login"
-                    // So we ALWAYS require OTP after password verification
+                    // So we ALWAYS require OTP after password verification (except for admin)
                     // Auto-login with token should be handled in account/my-account endpoint
-                    $requiresOtp = true; // ALWAYS require OTP after password login
+                    $requiresOtp = true; // ALWAYS require OTP after password login (for non-admin users)
                     
                     // Check inactivity (for logging purposes only)
                     $hoursSinceActivity = null;

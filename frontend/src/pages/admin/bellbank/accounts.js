@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { sentenceCase, capitalCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 // @mui
@@ -13,6 +14,8 @@ import {
   TableContainer,
   TablePagination,
   Switch,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // routes
@@ -25,6 +28,8 @@ import Label from '../../../components/Label';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
+// sections
+import { UserListToolbar } from '../../../sections/admin/user/list';
 // format number 
 import { fCurrency } from '../../../utils/formatNumber';
 // axios
@@ -41,6 +46,29 @@ const TABLE_HEAD = [
   { id: 'created_at', label: 'Created Date', alignRight: false },
 ];
 
+const ACCOUNT_TABS = [
+  {
+    value: 'ALL',
+    label: 'ALL'
+  },
+  {
+    value: 1,
+    label: 'Active'   
+  },
+  {
+    value: 2,
+    label: 'Banned'
+  },
+  {
+    value: 3,
+    label: 'Deactivated'
+  },
+  {
+    value: 0,
+    label: 'Unverified'
+  },
+];
+
 // ----------------------------------------------------------------------
 
 export default function BellBankAccounts() {
@@ -52,15 +80,17 @@ export default function BellBankAccounts() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [dense, SetDense] = useState(false);
+  const [role, setRole] = useState('ALL');
   const [isNotFound, SetNotFound] = useState(false);
+  const [status, setStatus] = useState('ALL');
   const { enqueueSnackbar } = useSnackbar();
   const AccessToken = window.localStorage.getItem('accessToken');
 
   useEffect(() => {
-    initialize(page, rowsPerPage, filterName);
+    initialize(page, rowsPerPage, status, filterName, role);
   }, []);
 
-  const initialize = async (pag, adex = 5, search) => {
+  const initialize = async (pag, adex = 5, status, search, role) => {
     let adex_page;
     if (pag > page) {
       adex_page = pag + 1;
@@ -69,9 +99,9 @@ export default function BellBankAccounts() {
     }
     SetLoad(true);
     try {
-      const data = await axios.get(`/api/admin/bellbank/accounts?page=${adex_page}&per_page=${adex}&search=${search || ''}`, {
-        headers: { Authorization: `Bearer ${AccessToken}` }
-      });
+      const statusParam = status === 'ALL' ? '' : `&status=${status}`;
+      const roleParam = role === 'ALL' ? '' : `&role=${role}`;
+      const data = await axios.get(`/api/admin/bellbank/accounts/${AccessToken}/secure?page=${adex_page}&per_page=${adex}${statusParam}${roleParam}&search=${search || ''}`);
 
       if (data.data?.status === 'success') {
         setAccountList(data.data?.data?.data || []);
@@ -97,14 +127,26 @@ export default function BellBankAccounts() {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    initialize(0, event.target.value, filterName);
+    initialize(0, event.target.value, status, filterName, role);
     setPage(0);
   };
 
   const handleFilterByName = async (filterName) => {
     setFilterName(filterName);
     setPage(0);
-    initialize(0, rowsPerPage, filterName);
+    if (filterName) {
+      initialize(page, rowsPerPage, status, filterName, role);
+    } else {
+      initialize(page, rowsPerPage, status, filterName, role);
+      SetNotFound(false);
+      SetLoad(false);
+    }
+  };
+
+  const handlerole = (role) => {
+    setRole(role);
+    setPage(0);
+    initialize(0, rowsPerPage, status, filterName, role);
   };
 
   function handleChangeDense(event) {
@@ -124,6 +166,24 @@ export default function BellBankAccounts() {
         />
 
         <Card>
+          <Tabs
+            value={status}
+            scrollButtons="auto"
+            variant="scrollable"
+            allowScrollButtonsMobile
+            onChange={(e, value) => {setStatus(value); initialize(page, rowsPerPage, value, filterName, role); }}
+          >
+            {ACCOUNT_TABS.map((tab) => (
+              <Tab disableRipple key={tab.value} label={capitalCase(tab.label)} value={tab.value} />
+            ))}
+          </Tabs>
+          <UserListToolbar
+            numSelected={0}
+            filterName={filterName}
+            onFilterName={handleFilterByName}
+            onDeleteUsers={() => {}}
+            onRoleUsers={handlerole}
+          />
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table size={dense ? 'small' : 'medium'}>
@@ -152,9 +212,9 @@ export default function BellBankAccounts() {
                           <TableCell align="left">
                             <Label
                               variant="ghost"
-                              color={status === 'active' ? 'success' : status === 'pending' ? 'warning' : 'error'}
+                              color={user?.status === 1 ? 'success' : user?.status === 0 ? 'warning' : 'error'}
                             >
-                              {status || 'N/A'}
+                              {sentenceCase((user?.status === 0 && 'unverified') || (user?.status === 1 && 'active') || (user?.status === 2 && 'banned') || (user?.status === 3 && 'deactivated') || 'N/A')}
                             </Label>
                           </TableCell>
                           <TableCell align="left">
@@ -194,7 +254,7 @@ export default function BellBankAccounts() {
             count={totalPage}
             rowsPerPage={rowsPerPage}
             page={page}
-            onPageChange={(e, page) => initialize(page, rowsPerPage, filterName)}
+            onPageChange={(e, page) => initialize(page, rowsPerPage, status, filterName, role)}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Card>

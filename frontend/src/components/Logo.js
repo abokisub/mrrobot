@@ -9,8 +9,9 @@ Logo.propTypes = {
 
 export default function Logo({ disabledLink = false, sx }) {
   // Use process.env.PUBLIC_URL for production builds, fallback to empty string for dev
-  const publicUrl = process.env.PUBLIC_URL || '';
-  const logoPath = `${publicUrl}/assets/images/logo.png`;
+  // PUBLIC_URL is typically empty unless deploying to a subdirectory
+  const publicUrl = (process.env.PUBLIC_URL || '').replace(/\/$/, ''); // Remove trailing slash
+  const logoPath = publicUrl ? `${publicUrl}/assets/images/logo.png` : '/assets/images/logo.png';
   
   const logo = (
     <Box 
@@ -20,13 +21,14 @@ export default function Logo({ disabledLink = false, sx }) {
       onError={(e) => {
         // Fallback: try alternative paths if primary fails
         const currentSrc = e.target.src;
+        const basePath = publicUrl || '';
         if (!currentSrc.includes('/static/logo.png')) {
-          e.target.src = `${publicUrl}/static/logo.png`;
+          e.target.src = `${basePath}/static/logo.png`;
         } else if (!currentSrc.includes('/logo.png')) {
-          e.target.src = `${publicUrl}/logo.png`;
+          e.target.src = `${basePath}/logo.png`;
         } else {
-          // If all fail, show a placeholder or hide
-          console.warn('Logo image not found at:', logoPath);
+          // If all fail, log warning but keep trying
+          console.warn('Logo image not found. Tried:', logoPath);
         }
       }}
       sx={{ 

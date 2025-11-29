@@ -73,15 +73,25 @@ export default function VerifyCode() {
   
   // Redirect logic - handled by RestGuard, but add safety check here too
   useEffect(() => {
+    // Check if user has a token
+    const hasToken = window.localStorage.getItem('accessToken') && 
+                     window.localStorage.getItem('accessToken') !== 'undefined' && 
+                     window.localStorage.getItem('accessToken') !== '';
+    
+    // Check if user status is 0 (unverified) - this is the primary check
+    const isUnverified = user && (user.status === 0 || user.status === '0');
+    
+    // Also check if user still has pending OTP (needs verification)
+    const hasPendingOtp = user && user.otp && user.otp.toString().trim() !== '';
+    
+    // If user has token and is unverified, stay on verify page (don't redirect)
+    if (hasToken && isUnverified) {
+      return; // Stay on verify page
+    }
+    
     // Only redirect if authentication is fully initialized
     if (isAuthenticated === true) {
-      // Check if user status is 0 (unverified) - this is the primary check
-      const isUnverified = user && user.status === 0;
-      
-      // Also check if user still has pending OTP (needs verification)
-      const hasPendingOtp = user && user.otp && user.otp.toString().trim() !== '';
-      
-      // If user is unverified (status === 0) OR has pending OTP, stay on verify page
+      // If user is unverified OR has pending OTP, stay on verify page
       if (isUnverified || hasPendingOtp) {
         // User needs verification - stay on verify page
         return;
@@ -93,8 +103,22 @@ export default function VerifyCode() {
         navigate(PATH_DASHBOARD.general.app, { replace: true });
       }, 100);
       return () => clearTimeout(timer);
-    } else if (isAuthenticated !== 'verify' && isAuthenticated !== false && isAuthenticated !== null) {
-      // User is not in verify state and not authenticated, redirect to login
+    }
+    
+    // If user is in verify state, stay on verify page
+    if (isAuthenticated === 'verify') {
+      return; // Stay on verify page
+    }
+    
+    // If user has token but authentication state is not initialized yet, wait
+    // Don't redirect to login if we have a token and user might be unverified
+    // Note: isInitialized might not be available in VerifyCode, so we'll check user instead
+    if (hasToken && !user) {
+      return; // Wait for user data to load
+    }
+    
+    // Only redirect to login if no token and not in verify state
+    if (!hasToken && isAuthenticated !== 'verify' && isAuthenticated !== false && isAuthenticated !== null) {
       navigate(PATH_AUTH.login, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);

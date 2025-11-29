@@ -21,17 +21,15 @@ export default function RestGuard({ children }) {
   // If user is fully authenticated (not in verify state), check if they still need verification
   if(isAuthenticated === true){
     // Check if user actually needs verification
-    // If user has status field and it's 0, they still need verification
-    // Also check if user has pending OTP
-    const needsVerification = (user && (
-      user.status === 0 || 
-      user.status === '0' ||
-      (user.otp && user.otp.trim() !== '')
-    ));
+    // The backend returns status: 'verify' if user needs verification
+    // If isAuthenticated is true but we're on verify page, check if user has OTP
+    // This prevents bypass on page refresh when user status is still 0
+    const hasPendingOtp = user && user.otp && user.otp.toString().trim() !== '';
+    const needsVerification = hasPendingOtp;
     
     if (needsVerification) {
-      // User is authenticated but still needs verification - allow access to verify page
-      // This prevents bypass on page refresh when user status is still 0
+      // User is authenticated but still has pending OTP - allow access to verify page
+      // This prevents bypass on page refresh
       return <>{children}</>;
     }
     

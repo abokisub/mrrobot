@@ -59,20 +59,27 @@ export default function VerifyCode() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
-  // Redirect if user is already verified and not in verify state
+  // Redirect logic - handled by RestGuard, but add safety check here too
   useEffect(() => {
     // Only redirect if authentication is fully initialized
     if (isAuthenticated === true) {
-      // Check if user needs verification by checking authentication state
-      // If isAuthenticated is true (not 'verify'), user is already verified
-      // But we should only redirect if they're not supposed to be on verify page
-      // The RestGuard will handle this, so we don't need to redirect here
-      // This prevents the bypass issue
-    } else if (isAuthenticated !== 'verify' && isAuthenticated !== false) {
+      // Check if user still has pending OTP (needs verification)
+      const hasPendingOtp = user && user.otp && user.otp.toString().trim() !== '';
+      
+      if (!hasPendingOtp) {
+        // User is fully verified with no pending OTP - redirect to dashboard
+        // Small delay to prevent flash of verify page
+        const timer = setTimeout(() => {
+          navigate(PATH_DASHBOARD.general.app, { replace: true });
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+      // User has pending OTP - stay on verify page
+    } else if (isAuthenticated !== 'verify' && isAuthenticated !== false && isAuthenticated !== null) {
       // User is not in verify state and not authenticated, redirect to login
       navigate(PATH_AUTH.login, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
   
   // Show loading if user data is not available yet
   if (!user || !user.email) {

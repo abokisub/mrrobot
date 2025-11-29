@@ -405,15 +405,23 @@ class AuthController extends Controller
                     'trace' => $e->getTraceAsString()
                 ]);
                 return response()->json([
-                    'status' => false,
+                    'status' => 'error',
                     'message' => 'An error occurred. Please try again later.'
                 ])->setStatusCode(500);
             }
         } else {
+            // Origin validation failed - return error status but don't use 403 to avoid logout
+            // This allows frontend to retry or maintain session
+            \Log::warning('Account endpoint origin validation failed', [
+                'origin' => $origin,
+                'referer' => $referer,
+                'fullUrl' => $fullUrl,
+                'allowedOrigins' => $allowedOrigins
+            ]);
             return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System',
-            ])->setStatusCode(403);
+                'status' => 'error',
+                'message' => 'Origin validation failed. Please refresh the page.'
+            ]);
         }
     }
     public function verify(Request $request)

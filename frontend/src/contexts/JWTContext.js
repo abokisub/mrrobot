@@ -107,35 +107,108 @@ function AuthProvider({ children }) {
       try {
         const accessToken = window.localStorage.getItem('accessToken');
         if (accessToken !== 'undefined' && accessToken !== null && accessToken !== ''){
-          const response = await axios.get(`/api/account/my-account/${accessToken}`,{
-           });
-          const  adex = response.data.user
-          window.localStorage.setItem('accessToken', accessToken);
-          
-          if(response.data.status === 'success'){
-            dispatch({
-              type: 'INITIALIZE',
-              payload: {
-                isAuthenticated: true,
-                user:adex,
-              },
-            });
-          }else if(response.data.status === 'verify'){
-            dispatch({
-              type: 'INITIALIZE',
-              payload: {
-                isAuthenticated: 'verify',
-                user:adex,
-              },
-            });
-          }else{
-            dispatch({
-              type: 'INITIALIZE',
-              payload: {
-                isAuthenticated: false,
-                user:adex,
-              },
-            });
+          try {
+            const response = await axios.get(`/api/account/my-account/${accessToken}`,{
+             });
+            const  adex = response.data.user
+            window.localStorage.setItem('accessToken', accessToken);
+            
+            if(response.data.status === 'success'){
+              dispatch({
+                type: 'INITIALIZE',
+                payload: {
+                  isAuthenticated: true,
+                  user:adex,
+                },
+              });
+            }else if(response.data.status === 'verify'){
+              dispatch({
+                type: 'INITIALIZE',
+                payload: {
+                  isAuthenticated: 'verify',
+                  user:adex,
+                },
+              });
+            }else{
+              // If status is not success or verify, but we have a token, keep user logged in
+              // Only log out if explicitly told to (status 403 or similar)
+              if (response.data.status === 403 || response.status === 403) {
+                // Clear invalid token and log out
+                window.localStorage.removeItem('accessToken');
+                dispatch({
+                  type: 'INITIALIZE',
+                  payload: {
+                    isAuthenticated: false,
+                    user: null,
+                  },
+                });
+              } else {
+                // Keep user logged in with existing data
+                dispatch({
+                  type: 'INITIALIZE',
+                  payload: {
+                    isAuthenticated: true,
+                    user: adex || null,
+                  },
+                });
+              }
+            }
+          } catch (apiError) {
+            // If API call fails but we have a token, don't immediately log out
+            // Try to preserve session - might be temporary network issue
+            console.error('Account API error:', apiError);
+            
+            const errorStatus = apiError?.response?.status;
+            const errorData = apiError?.response?.data;
+            
+            // Only log out if it's explicitly a token/auth error (403/401) AND message indicates invalid token
+            const isAuthError = errorStatus === 403 || errorStatus === 401;
+            const isInvalidToken = errorData?.message?.toLowerCase().includes('token') || 
+                                  errorData?.message?.toLowerCase().includes('expired') ||
+                                  errorData?.message?.toLowerCase().includes('invalid');
+            
+            if (isAuthError && isInvalidToken) {
+              // Clear invalid token and log out
+              window.localStorage.removeItem('accessToken');
+              dispatch({
+                type: 'INITIALIZE',
+                payload: {
+                  isAuthenticated: false,
+                  user: null,
+                },
+              });
+            } else {
+              // For other errors (network, 500, origin validation, etc.), keep token and maintain session
+              // User might still be valid, just API temporarily unavailable or origin issue
+              // Retry the request after a short delay
+              setTimeout(async () => {
+                try {
+                  const retryResponse = await axios.get(`/api/account/my-account/${accessToken}`);
+                  if (retryResponse.data && retryResponse.data.status === 'success') {
+                    dispatch({
+                      type: 'INITIALIZE',
+                      payload: {
+                        isAuthenticated: true,
+                        user: retryResponse.data.user,
+                      },
+                    });
+                  }
+                } catch (retryError) {
+                  // If retry also fails, keep session but mark as uninitialized
+                  // Don't log out - let user continue with cached data
+                  console.warn('Retry failed, maintaining session:', retryError);
+                }
+              }, 1000);
+              
+              // Keep user logged in with existing state
+              dispatch({
+                type: 'INITIALIZE',
+                payload: {
+                  isAuthenticated: true,
+                  user: null, // Will be loaded on retry or next successful request
+                },
+              });
+            }
           }
         
         } else {
@@ -148,6 +221,8 @@ function AuthProvider({ children }) {
           });
         }
       } catch (err) {
+          // Only log out on critical errors
+          console.error('Initialization error:', err);
           dispatch({
             type: 'INITIALIZE',
             payload: {

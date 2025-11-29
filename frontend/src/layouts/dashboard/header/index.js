@@ -94,7 +94,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
               textOverflow: 'ellipsis'
             }}
           >
-            Hi {user?.username || 'User'}
+            Hi {user?.username && user.username.trim() ? user.username : (user?.name && user.name.trim() ? user.name : 'User')}
           </Typography>
           {user?.kyc === 1 && (
             <Iconify

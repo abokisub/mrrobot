@@ -67,7 +67,9 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
       <Toolbar
         sx={{
           minHeight: '100% !important',
-          px: { lg: 5 },
+          px: { xs: 1, sm: 2, lg: 5 },
+          gap: { xs: 0.5, sm: 1 },
+          overflow: 'visible'
         }}
       >
         {isDesktop && verticalLayout && <Logo sx={{ mr: 2.5 }} />}

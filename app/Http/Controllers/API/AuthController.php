@@ -526,11 +526,10 @@ class AuthController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(env('ERROR_500'));
+            // Return JSON error instead of redirect for API requests
             return response()->json([
                 'status' => 403,
-                'message' => 'Unable to Authenticate System',
-
+                'message' => 'Unable to verify OTP. Please check your connection and try again, or request a new OTP.',
             ])->setStatusCode(403);
         }
     }

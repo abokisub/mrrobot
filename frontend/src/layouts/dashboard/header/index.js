@@ -81,17 +81,17 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, flex: '0 0 auto' }}>
           <Typography 
             variant="h6" 
+            noWrap={false}
             sx={{ 
               color: 'text.primary', 
               fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
               display: { xs: 'block', sm: 'block' },
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              maxWidth: { xs: '120px', sm: '200px', md: 'none' }
+              flexShrink: 0,
+              overflow: 'visible'
             }}
           >
-            Hi {user?.username}
+            Hi {user?.username || ''}
           </Typography>
           {user?.kyc === 1 && (
             <Iconify 

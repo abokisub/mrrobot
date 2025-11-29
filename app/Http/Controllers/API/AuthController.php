@@ -427,6 +427,9 @@ class AuthController extends Controller
                     $general = $this->general();
                     $this->updateData($data, 'user', $tableid);
                     
+                    // Refresh user data after status update
+                    $user = DB::table('user')->where(['id' => $user->id])->first();
+                    
                     // STEP 4: Only after OTP success → mark device as trusted
                     // Store device as trusted after OTP verification
                     try {
@@ -472,9 +475,42 @@ class AuthController extends Controller
                         }
                     }
                     
+                    // Generate token for authenticated user
+                    try {
+                        $token = $this->generatetoken($user->id);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to generate token after OTP verification: ' . $e->getMessage());
+                        $token = $user->apikey ?? null;
+                    }
+                    
+                    // Get updated user details with error handling
+                    try {
+                        $user_details = $this->getUserDetailsWithBellBank($user);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to get user details with BellBank: ' . $e->getMessage(), [
+                            'user_id' => $user->id,
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        // Fallback to basic user details if BellBank lookup fails
+                        $user_details = [
+                            'username' => $user->username,
+                            'name' => $user->name,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'bal' => (float) $user->bal,
+                            'refbal' => (float) $user->refbal,
+                            'kyc' => $user->kyc,
+                            'type' => $user->type,
+                            'pin' => $user->pin,
+                            'apikey' => $user->apikey,
+                            'is_bvn' => $user->bvn == null ? false : true,
+                        ];
+                    }
+                    
                     return response()->json([
                         'status' => 'success',
                         'message' => 'account verified',
+                        'token' => $token,
                         'user' => $user_details
                     ]);
                 } else {
@@ -1010,37 +1046,47 @@ class AuthController extends Controller
      */
     protected function getUserDetailsWithBellBank($user)
     {
-        // Get BellBank virtual account
-        $bellAccount = \App\Models\BellAccount::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $bellAccount = null;
+        
+        // Get BellBank virtual account with error handling
+        try {
+            if (class_exists(\App\Models\BellAccount::class)) {
+                $bellAccount = \App\Models\BellAccount::where('user_id', $user->id)
+                    ->where('status', 'active')
+                    ->first();
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to fetch BellBank account: ' . $e->getMessage(), [
+                'user_id' => $user->id ?? 'unknown'
+            ]);
+        }
         
         $user_details = [
-            'username' => $user->username,
-            'name' => $user->name,
-            'phone' => $user->phone,
-            'email' => $user->email,
-            'bal' => (float) $user->bal,
-            'refbal' => (float) $user->refbal,
-            'kyc' => $user->kyc,
-            'type' => $user->type,
-            'pin' => $user->pin,
-            'profile_image' => $user->profile_image,
-            'sterlen' => $user->sterlen,
-            'fed' => $user->fed,
-            'wema' => $user->wema,
-            'rolex' => $user->rolex,
-            'vdf' => $user->vdf,
-            'address' => $user->address,
-            'webhook' => $user->webhook,
-            'about' => $user->about,
-            'apikey' => $user->apikey,
-            'is_bvn' => $user->bvn == null ? false : true,
+            'username' => $user->username ?? '',
+            'name' => $user->name ?? '',
+            'phone' => $user->phone ?? '',
+            'email' => $user->email ?? '',
+            'bal' => isset($user->bal) ? (float) $user->bal : 0.00,
+            'refbal' => isset($user->refbal) ? (float) $user->refbal : 0.00,
+            'kyc' => $user->kyc ?? '0',
+            'type' => $user->type ?? 'SMART',
+            'pin' => $user->pin ?? '',
+            'profile_image' => $user->profile_image ?? null,
+            'sterlen' => $user->sterlen ?? null,
+            'fed' => $user->fed ?? null,
+            'wema' => $user->wema ?? null,
+            'rolex' => $user->rolex ?? null,
+            'vdf' => $user->vdf ?? null,
+            'address' => $user->address ?? null,
+            'webhook' => $user->webhook ?? null,
+            'about' => $user->about ?? null,
+            'apikey' => $user->apikey ?? null,
+            'is_bvn' => isset($user->bvn) && $user->bvn != null,
             'bellbank_account' => $bellAccount ? [
-                'account_number' => $bellAccount->account_number,
+                'account_number' => $bellAccount->account_number ?? null,
                 'bank_name' => $bellAccount->bank_name ?: 'BellBank',
-                'account_name' => isset($bellAccount->metadata['accountName']) ? $bellAccount->metadata['accountName'] : $user->username,
-                'status' => $bellAccount->status,
+                'account_name' => isset($bellAccount->metadata['accountName']) ? $bellAccount->metadata['accountName'] : ($user->username ?? ''),
+                'status' => $bellAccount->status ?? 'pending',
             ] : null
         ];
         
